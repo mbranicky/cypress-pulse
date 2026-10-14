@@ -2,7 +2,7 @@
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and open screenshots without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
-Standalone plugin, with no dependency on Playwright Pulse. Your tested projects keep their existing sources, configuration, and dependencies.
+Standalone plugin, inspired by [Playwright Pulse](https://github.com/stevecastaneda/paseo-plugins/tree/main/playwright-pulse#readme). Your tested projects keep their existing sources, configuration, and dependencies.
 
 <p>
   <img src="assets/running.png" width="360" alt="Cypress Pulse showing a live run with one of two specs completed">
