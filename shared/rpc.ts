@@ -28,6 +28,19 @@ export const testSchema = z.object({
     )
     .default([]),
 });
+export const specSchema = z.object({
+  file: z.string(),
+  status: z.string(),
+  observed: z.number(),
+  passed: z.number(),
+  failed: z.number(),
+  pending: z.number(),
+  skipped: z.number(),
+  running: z.number(),
+  queued: z.number(),
+  retries: z.number(),
+});
+export type PulseSpec = z.infer<typeof specSchema>;
 export const runSchema = z.object({
   id: z.string(),
   source: z.enum(["batch", "interactive"]),
@@ -52,6 +65,7 @@ export const runSchema = z.object({
   retries: z.number(),
   sessionPid: z.number().optional(),
   tests: z.array(testSchema),
+  specs: z.array(specSchema).default([]),
   errors: z.array(z.string()),
   truncated: z.boolean().optional(),
   artifacts: z
@@ -127,4 +141,13 @@ export const installSkill = defineRpc({
   name: "skill.install",
   input: z.object({}),
   output: skillResult,
+});
+
+export const specSource = defineRpc({
+  name: "spec.source",
+  input: workspace.extend({
+    runId: z.string().min(1),
+    file: z.string().min(1).max(4096),
+  }),
+  output: z.object({ file: z.string(), text: z.string().max(1024 * 1024) }),
 });

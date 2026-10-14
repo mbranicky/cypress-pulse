@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { Icon } from "@getpaseo/plugin/client/react-native";
 import type { PulseRun } from "../shared/rpc";
-import { basename, duration, tone, statusIcon, type Colors } from "./ui";
+import { basename, duration, tone, statusIcon, live, type Colors } from "./ui";
 
 export function RunSummary({
   run,
@@ -19,7 +19,9 @@ export function RunSummary({
   const status =
     run.status === "empty"
       ? "No executed tests"
-      : run.status[0].toUpperCase() + run.status.slice(1);
+      : live(run) && run.failed
+        ? `Running · ${run.failed} failed`
+        : run.status[0].toUpperCase() + run.status.slice(1);
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -31,8 +33,8 @@ export function RunSummary({
         <Text
           style={{
             flex: 1,
-            color: tone(run.status, colors),
-            fontSize: 13,
+            color: run.failed ? colors.statusDanger : tone(run.status, colors),
+            fontSize: 14,
             fontWeight: "600",
           }}
         >
@@ -113,7 +115,7 @@ export function RunSummary({
               text: `${done} of ${total} ${unit} completed`,
             }}
             style={{
-              height: 3,
+              height: 5,
               backgroundColor: colors.surface2,
               borderRadius: 2,
               overflow: "hidden",
@@ -121,7 +123,7 @@ export function RunSummary({
           >
             <View
               style={{
-                height: 3,
+                height: 5,
                 width: `${Math.min(100, (done / Math.max(1, total)) * 100)}%`,
                 backgroundColor: tone(run.status, colors),
               }}

@@ -6,6 +6,9 @@ import { inside, listBatchRuns } from "./store.mjs";
 import { TapCollector, flattenReport } from "./tap.mjs";
 import { runSchema, type PulseRun } from "../shared/rpc";
 
+import { summarizeSpecs } from "../shared/specs.mjs";
+import { readSpecSource } from "./source.mjs";
+
 const tap = new TapCollector();
 const cache = new Map<
   string,
@@ -60,12 +63,14 @@ export function trimRuns(
         ? [...run.tests]
             .sort(
               (a, b) =>
-                Number(b.status === "failed") - Number(a.status === "failed"),
+                (a.status === "failed" ? 0 : a.status === "running" ? 1 : 2) -
+                (b.status === "failed" ? 0 : b.status === "running" ? 1 : 2),
             )
             .slice(0, 300)
         : [];
     return {
       ...run,
+      specs: run.id === selectedId ? summarizeSpecs(run) : [],
       tests,
       truncated: run.id === selectedId && run.tests.length > tests.length,
     };
@@ -130,4 +135,15 @@ export async function preview(
 export function cleanup() {
   cache.clear();
   tap.clear();
+}
+
+export async function sourcePreview(
+  directory: string,
+  runId: string,
+  file: string,
+) {
+  const { runs } = await collect(directory);
+  const run = runs.find((item) => item.id === runId);
+  if (!run) throw new Error("That run is unavailable.");
+  return readSpecSource(run, file, directory);
 }

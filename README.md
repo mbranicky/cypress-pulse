@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, review failures, and open screenshots without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
+Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and open screenshots without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
 Standalone plugin, with no dependency on Playwright Pulse. Your tested projects keep their existing sources, configuration, and dependencies.
 
@@ -9,7 +9,7 @@ Standalone plugin, with no dependency on Playwright Pulse. Your tested projects 
   <img src="assets/failure.png" width="360" alt="Completed demo run with a focused failure message and test results">
 </p>
 
-These are real Paseo desktop captures of an isolated example storefront. The final assertion deliberately fails to demonstrate failure reporting; the images are cropped to the plugin panel.
+These are real Paseo desktop captures of an isolated example storefront. The final assertion deliberately fails to demonstrate failure reporting. Captures are cropped to the plugin panel or source preview.
 
 <details>
 <summary>Light theme example</summary>
@@ -36,19 +36,28 @@ The installer runs only when clicked. Existing files or links owned by another i
 
 ## Requirements
 
-| Component            | Supported versions |
-| -------------------- | ------------------ | --- | -------- |
-| Paseo app and daemon | `>=0.11.2 <0.12.0` |
-| Project Cypress      | `>=16.0.0 <17.0.0` |
-| Helper Node.js       | `^22.18.0          |     | ^24.0.0` |
+| Component            | Supported versions      |
+| -------------------- | ----------------------- |
+| Paseo app and daemon | `>=0.11.2 <0.12.0`      |
+| Project Cypress      | `>=16.0.0 <17.0.0`      |
+| Helper Node.js       | `^22.18.0` or `^24.0.0` |
 
 ## Using the panel
 
 - **Recent runs** switches between independent executions, including concurrent runs in the workspace.
 - The summary shows browser, run mode, elapsed time, completed specs, outcomes, and retries. Batch progress counts specs because unevaluated specs do not yet provide a total test count.
-- Failures appear first. Expand a test to see its file and failure message; **Stack trace** and **Copy error** provide more detail. Use **Failed** to focus the list.
-- **Screenshots** opens Cypress-generated images. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
+- Tests are grouped by **spec file**, with outcome and retry counts in each header. Running and failing files appear first and start expanded; completed files start collapsed. Use the chevron to expand or collapse a file.
+- Click a **filename** to read its current source, with line numbers and **Copy source**. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.
+- Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts.
+- **Screenshot** opens Cypress-generated images from the matching file section. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
 - Interactive runs offer **Spec report** after completion. The first five failure messages load automatically; additional failures have **Read failure**.
+
+<details>
+<summary>Source preview example</summary>
+
+<img src="assets/source-preview.png" width="520" alt="Read-only Cypress spec source preview with line numbers and Copy source">
+
+</details>
 
 Pending/skipped-only executions are marked **No executed tests**, so they cannot be mistaken for a successful verification.
 
@@ -76,7 +85,7 @@ For interactive tests, start **cypress open** normally and choose a Chromium-fam
 
 An already running, uninstrumented batch invocation cannot be attached. Interactive monitoring currently supports Chromium-family browsers. This version observes tests; it has no stop or rerun controls.
 
-The panel lists 30 recent runs and up to 300 test details for the selected run, with failures first. Counts cover the full run. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
+The panel lists 30 recent runs and up to 300 test details for the selected run, with failures and running tests first. Run and file counts cover the full execution, including tests outside the detail limit. Source previews read only specs identified by the run, inside the workspace, with a 1 MiB limit; long lines can be scrolled horizontally. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
 
 Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No cloud account is required.
 
@@ -91,9 +100,9 @@ paseo plugin install /absolute/path/to/cypress-pulse
 
 After changes, typecheck and run `paseo plugin reload cypress-pulse`.
 
-Unit tests cover reporting, retries, empty runs, interruption, runtime gates, session targeting, report freshness, and skill installation with ownership protection. Integration tests run real Cypress against isolated CommonJS, ESM, and TypeScript configurations, checking asynchronous hooks, tasks, reporter preservation, and unchanged source checksums.
+Unit tests cover reporting, retries, empty runs, interruption, runtime gates, session targeting, report freshness, skill installation with ownership protection, file grouping, and source-preview boundaries. Integration tests run real Cypress against isolated CommonJS, ESM, and TypeScript configurations, checking asynchronous hooks, tasks, reporter preservation, and unchanged source checksums.
 
-Verified with Paseo 0.11.2 on macOS, Cypress 16.1.1, and Cypress 16.0.0 for the minimum-version batch path. Live interactive Electron sessions, reruns, failure messages, batch screenshot previews, and one-click skill installation, narrow Explorer layouts, and Ghostty/Light themes were checked in the desktop app. Compatibility checks used Node 22.18.0 and 24.16.0.
+Verified with Paseo 0.11.2 on macOS, Cypress 16.1.1, and Cypress 16.0.0 for the minimum-version batch path. Live interactive Electron sessions, reruns, failure messages, batch screenshot previews, one-click skill installation, grouped file sections, source previews, narrow Explorer layouts, and Ghostty/Light themes were checked in the desktop app. Compatibility checks used Node 22.18.0 and 24.16.0.
 
 Windows, Linux, and mobile clients are not yet verified. Component tests are outside the current compatibility matrix. Supported ranges are enforced; unusual project plugins and configurations may need further compatibility testing.
 

@@ -15,12 +15,14 @@ import {
   dashboard,
   interactiveReport,
   screenshot,
-  type PulseTest,
+  specSource,
 } from "../shared/rpc";
 import { Action, Divider, basename, live, tone, statusIcon } from "./ui";
 import { AgentSetup } from "./setup";
 import { RunSummary } from "./run-summary";
-import { TestRow } from "./test-row";
+import { SpecGroup } from "./spec-group";
+import { SourcePreview } from "./source-preview";
+import { specKey } from "../shared/specs.mjs";
 
 export function PulsePanel({
   theme,
@@ -32,6 +34,7 @@ export function PulsePanel({
   const read = useRpc(dashboard);
   const report = useRpc(interactiveReport);
   const preview = useRpc(screenshot);
+  const readSource = useRpc(specSource);
   const [selected, setSelected] = useState<string>();
   const [filter, setFilter] = useState<"all" | "failed">("all");
   const [history, setHistory] = useState(false);
@@ -41,6 +44,7 @@ export function PulsePanel({
     title: string;
     text?: string;
     image?: string;
+    source?: { file: string; text: string };
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const query = useQuery({
@@ -87,26 +91,21 @@ export function PulsePanel({
       setBusy(false);
     }
   }
-  const failures = run?.tests.filter((test) => test.status === "failed") || [];
-  const others = run?.tests.filter((test) => test.status !== "failed") || [];
-  const row = (test: PulseTest) => (
-    <TestRow
-      key={`${run?.id}:${test.id}`}
-      test={test}
-      colors={colors}
-      busy={busy}
-      onPreview={(item, index) => {
-        void showScreenshot(item.id, index, item.title);
-      }}
-      onReport={
-        run?.source === "interactive"
-          ? () => {
-              void showReport(test.id);
-            }
-          : undefined
-      }
-    />
-  );
+  async function showSource(file: string) {
+    if (!run) return;
+    setBusy(true);
+    setDetail({ title: basename(file), text: "Reading spec source…" });
+    try {
+      const source = await readSource({ workspaceId, runId: run.id, file });
+      setDetail({ title: basename(file), source });
+    } catch (error) {
+      setDetail({ title: "Source unavailable", text: String(error) });
+    } finally {
+      setBusy(false);
+    }
+  }
+  const groups =
+    run?.specs.filter((spec) => filter === "all" || spec.failed > 0) || [];
   return (
     <View style={{ flex: 1, backgroundColor: colors.surface0 }}>
       <View
@@ -337,7 +336,7 @@ export function PulsePanel({
                 tests.
               </Text>
             ) : null}
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: 10 }}>
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
               >
@@ -349,7 +348,7 @@ export function PulsePanel({
                     fontWeight: "600",
                   }}
                 >
-                  Tests{run.totalTests !== null ? ` · ${run.totalTests}` : ""}
+                  Spec files
                 </Text>
                 <Action
                   label="All"
@@ -364,25 +363,52 @@ export function PulsePanel({
                   onPress={() => setFilter("failed")}
                 />
               </View>
-              {failures.length ? (
-                <View>
-                  <Text
-                    style={{
-                      color: colors.statusDanger,
-                      fontSize: 11,
-                      fontWeight: "600",
-                      paddingVertical: 6,
-                    }}
-                  >
-                    {failures.length}{" "}
-                    {failures.length === 1 ? "failure" : "failures"}
-                  </Text>
-                  {failures.map(row)}
-                </View>
-              ) : null}
-              {filter === "all" ? (
-                others.map(row)
-              ) : !failures.length ? (
+              {groups.map((spec) => (
+                <SpecGroup
+                  key={`${run.id}:${spec.file}:${filter}`}
+                  spec={spec}
+                  colors={colors}
+                  filter={filter}
+                  busy={busy}
+                  truncated={Boolean(run.truncated)}
+                  tests={run.tests
+                    .filter(
+                      (test) =>
+                        specKey(test.file, run.projectRoot) === spec.file,
+                    )
+                    .map((test) =>
+                      live(run) &&
+                      run.source === "interactive" &&
+                      test.status === "pending"
+                        ? { ...test, status: "queued" }
+                        : test,
+                    )}
+                  artifacts={run.artifacts
+                    .map((item, index) => ({ ...item, index }))
+                    .filter(
+                      (item) =>
+                        item.kind === "screenshot" &&
+                        specKey(item.file, run.projectRoot) === spec.file,
+                    )}
+                  onSource={(file) => {
+                    void showSource(file);
+                  }}
+                  onPreview={(test, index) => {
+                    void showScreenshot(test.id, index, test.title);
+                  }}
+                  onArtifact={(index) => {
+                    void showScreenshot("__spec_artifact__", index, spec.file);
+                  }}
+                  onReport={
+                    run.source === "interactive"
+                      ? (id) => {
+                          void showReport(id);
+                        }
+                      : undefined
+                  }
+                />
+              ))}
+              {!groups.length ? (
                 <Text
                   style={{
                     color: colors.foregroundMuted,
@@ -390,20 +416,11 @@ export function PulsePanel({
                     lineHeight: 18,
                   }}
                 >
-                  No failures{live(run) ? " so far" : ""}.
-                </Text>
-              ) : null}
-              {!run.tests.length && filter === "all" ? (
-                <Text
-                  style={{
-                    color: colors.foregroundMuted,
-                    fontSize: 12,
-                    lineHeight: 18,
-                  }}
-                >
-                  {live(run)
-                    ? "Waiting for test results…"
-                    : "No test details available."}
+                  {filter === "failed"
+                    ? `No failures${live(run) ? " so far" : ""}.`
+                    : live(run)
+                      ? "Waiting for the first spec…"
+                      : "No spec details available."}
                 </Text>
               ) : null}
               {run.truncated ? (
@@ -414,84 +431,11 @@ export function PulsePanel({
                     lineHeight: 17,
                   }}
                 >
-                  Showing up to 300 tests, with failures first. Counts cover the
-                  full run.
+                  Showing up to 300 test details, with failures and running
+                  tests first. File counts cover the full run.
                 </Text>
               ) : null}
             </View>
-            {run.artifacts.some((item) => item.kind === "screenshot") ? (
-              <View style={{ gap: 4 }}>
-                <Text
-                  style={{
-                    color: colors.foreground,
-                    fontSize: 13,
-                    fontWeight: "600",
-                    marginBottom: 4,
-                  }}
-                >
-                  Screenshots
-                </Text>
-                {run.artifacts.map((item, index) =>
-                  item.kind === "screenshot" ? (
-                    <Pressable
-                      key={item.path}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Preview ${basename(item.path)}`}
-                      disabled={busy}
-                      onPress={() => {
-                        void showScreenshot(
-                          "__spec_artifact__",
-                          index,
-                          item.file,
-                        );
-                      }}
-                      style={({ pressed }) => ({
-                        minHeight: 44,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 8,
-                        paddingVertical: 8,
-                        opacity: busy ? 0.5 : 1,
-                        backgroundColor: pressed
-                          ? colors.surface1
-                          : "transparent",
-                      })}
-                    >
-                      <Icon
-                        name="Image"
-                        size={14}
-                        color={colors.foregroundMuted}
-                      />
-                      <View style={{ flex: 1, gap: 3 }}>
-                        <Text
-                          style={{
-                            color: colors.foreground,
-                            fontSize: 12,
-                            lineHeight: 18,
-                          }}
-                        >
-                          {basename(item.path)}
-                        </Text>
-                        <Text
-                          numberOfLines={1}
-                          style={{
-                            color: colors.foregroundMuted,
-                            fontSize: 10,
-                          }}
-                        >
-                          {basename(item.file)}
-                        </Text>
-                      </View>
-                      <Icon
-                        name="ArrowUpRight"
-                        size={14}
-                        color={colors.foregroundMuted}
-                      />
-                    </Pressable>
-                  ) : null,
-                )}
-              </View>
-            ) : null}
             {run.source === "interactive" ? (
               <View style={{ alignSelf: "flex-start" }}>
                 <Action
@@ -522,6 +466,12 @@ export function PulsePanel({
               source={{ uri: detail.image }}
               resizeMode="contain"
               style={{ width: "100%", height: 440 }}
+            />
+          ) : detail?.source ? (
+            <SourcePreview
+              file={detail.source.file}
+              text={detail.source.text}
+              colors={colors}
             />
           ) : (
             <Text

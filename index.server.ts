@@ -4,6 +4,7 @@ import {
   briefs,
   interactiveReport,
   screenshot,
+  specSource,
   skillStatus,
   installSkill,
 } from "./shared/rpc";
@@ -14,6 +15,7 @@ import {
   report,
   preview,
   cleanup,
+  sourcePreview,
 } from "./server/handlers";
 import { installHelper, findPluginDirectory } from "./server/runtime";
 import {
@@ -107,6 +109,13 @@ export default function contribute(server: PluginServerContext) {
   );
   server.handle(screenshot, async (input, { paseo }) =>
     preview(await workspaceDirectory(paseo, input.workspaceId), input),
+  );
+  server.handle(specSource, async (input, { paseo }) =>
+    sourcePreview(
+      await workspaceDirectory(paseo, input.workspaceId),
+      input.runId,
+      input.file,
+    ),
   );
   return cleanup;
 }

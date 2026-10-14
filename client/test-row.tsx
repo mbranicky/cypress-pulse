@@ -10,12 +10,14 @@ export function TestRow({
   onPreview,
   onReport,
   busy,
+  grouped = false,
 }: {
   test: PulseTest;
   colors: Colors;
   onPreview(test: PulseTest, index: number): void;
   onReport?: () => void;
   busy: boolean;
+  grouped?: boolean;
 }) {
   const [expanded, setExpanded] = useState(test.status === "failed");
   const [stack, setStack] = useState(false);
@@ -65,7 +67,12 @@ export function TestRow({
             </Text>
           ) : null}
           <Text
-            style={{ color: colors.foreground, fontSize: 12, lineHeight: 18 }}
+            style={{
+              color: colors.foreground,
+              fontSize: 12,
+              lineHeight: 18,
+              fontWeight: test.status === "failed" ? "600" : "400",
+            }}
           >
             {test.title}
           </Text>
@@ -79,7 +86,9 @@ export function TestRow({
         >
           {test.status === "running"
             ? "Running"
-            : test.status === "pending" || test.status === "skipped"
+            : test.status === "pending" ||
+                test.status === "skipped" ||
+                test.status === "queued"
               ? "—"
               : test.duration >= 1000
                 ? duration(test.duration)
@@ -93,26 +102,45 @@ export function TestRow({
       </Pressable>
       {expanded ? (
         <View style={{ gap: 8, marginLeft: 22, paddingBottom: 8 }}>
-          <Text
-            selectable
-            style={{
-              color: colors.foregroundMuted,
-              fontSize: 11,
-              lineHeight: 16,
-            }}
-          >
-            {test.file}
-            {test.retry
-              ? ` · ${test.retry} ${test.retry === 1 ? "retry" : "retries"}`
-              : ""}
-          </Text>
+          {grouped && !test.error ? (
+            <Text
+              selectable
+              style={{
+                color: colors.foregroundMuted,
+                fontSize: 11,
+                lineHeight: 17,
+              }}
+            >
+              {test.titlePath.join(" › ") || test.title}
+              {"\n"}
+              {test.status[0].toUpperCase() + test.status.slice(1)}
+              {["passed", "failed"].includes(test.status)
+                ? ` · ${Math.round(test.duration).toLocaleString()} ms`
+                : ""}
+            </Text>
+          ) : null}
+          {!grouped || test.retry ? (
+            <Text
+              selectable
+              style={{
+                color: colors.foregroundMuted,
+                fontSize: 11,
+                lineHeight: 16,
+              }}
+            >
+              {!grouped ? test.file : ""}
+              {test.retry
+                ? `${grouped ? "" : " · "}${test.retry} ${test.retry === 1 ? "retry" : "retries"}`
+                : ""}
+            </Text>
+          ) : null}
           {test.error ? (
             <View
               style={{
                 gap: 6,
-                borderLeftWidth: 2,
-                borderLeftColor: colors.statusDanger,
-                paddingLeft: 10,
+                backgroundColor: colors.surface1,
+                borderRadius: 6,
+                padding: 10,
               }}
             >
               <Text
