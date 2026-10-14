@@ -112,3 +112,19 @@ export const screenshot = defineRpc({
   }),
   output: z.object({ dataUri: z.string() }),
 });
+
+const skillState = z.enum(["missing", "current", "outdated", "foreign"]);
+const skillResult = z.object({
+  state: skillState,
+  targets: z.array(z.object({ path: z.string(), state: skillState })),
+});
+export const skillStatus = defineRpc({
+  name: "skill.status",
+  input: z.object({}),
+  output: skillResult,
+});
+export const installSkill = defineRpc({
+  name: "skill.install",
+  input: z.object({}),
+  output: skillResult,
+});

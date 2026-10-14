@@ -15,11 +15,13 @@ const files = [
   "config.cjs",
   "reporter.cjs",
 ];
-export async function installHelper(): Promise<string> {
+export async function findPluginDirectory(): Promise<string> {
   let source: string | undefined;
-  for (const cli of [process.env.PASEO_BIN, "paseo"].filter(
-    Boolean,
-  ) as string[]) {
+  for (const cli of [
+    process.env.PASEO_BIN,
+    "paseo",
+    "/Applications/Paseo.app/Contents/Resources/bin/paseo",
+  ].filter(Boolean) as string[]) {
     try {
       const { stdout } = await promisify(execFile)(
         cli,
@@ -36,6 +38,10 @@ export async function installHelper(): Promise<string> {
   }
   if (!source)
     throw new Error("Could not locate the installed Cypress Pulse helper.");
+  return source;
+}
+export async function installHelper(): Promise<string> {
+  const source = await findPluginDirectory();
   const contents = await Promise.all(
     files.map((file) => readFile(join(source!, "server", file), "utf8")),
   );

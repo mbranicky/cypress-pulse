@@ -1,5 +1,12 @@
 import type { PluginServerContext } from "@getpaseo/plugin/server";
-import { dashboard, briefs, interactiveReport, screenshot } from "./shared/rpc";
+import {
+  dashboard,
+  briefs,
+  interactiveReport,
+  screenshot,
+  skillStatus,
+  installSkill,
+} from "./shared/rpc";
 import {
   workspaceDirectory,
   collect,
@@ -8,7 +15,11 @@ import {
   preview,
   cleanup,
 } from "./server/handlers";
-import { installHelper } from "./server/runtime";
+import { installHelper, findPluginDirectory } from "./server/runtime";
+import {
+  skillStatus as readSkillStatus,
+  installSkill as linkSkill,
+} from "./server/skill.mjs";
 
 export default function contribute(server: PluginServerContext) {
   let helper: string | null = null;
@@ -21,6 +32,12 @@ export default function contribute(server: PluginServerContext) {
       helperError = error.message;
       console.error("Cypress Pulse helper:", error.message);
     });
+  server.handle(skillStatus, async () =>
+    readSkillStatus(await findPluginDirectory()),
+  );
+  server.handle(installSkill, async () =>
+    linkSkill(await findPluginDirectory()),
+  );
   server.handle(dashboard, async (input, { paseo }) => {
     const directory = await workspaceDirectory(paseo, input.workspaceId);
     const { runs, notices } = await collect(directory);

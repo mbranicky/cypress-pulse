@@ -1,13 +1,30 @@
 {
   "name": "cypress-pulse",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": "^22.18.0 || ^24.0.0" },
-  "bin": { "cypress-pulse": "server/cli.mjs" },
-  "files": ["paseo-plugin.json", "OVERVIEW.md", "README.md", "LICENSE", "index.client.tsx", "index.server.ts", "client/", "server/", "shared/", "skills/", "!**/*.test.mjs"],
+  "engines": {
+    "node": "^22.18.0 || ^24.0.0"
+  },
+  "bin": {
+    "cypress-pulse": "server/cli.mjs"
+  },
+  "files": [
+    "paseo-plugin.json",
+    "OVERVIEW.md",
+    "README.md",
+    "LICENSE",
+    "index.client.tsx",
+    "index.server.ts",
+    "client/",
+    "server/",
+    "shared/",
+    "skills/",
+    "!**/*.test.mjs",
+    "assets/"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test server/*.test.mjs",

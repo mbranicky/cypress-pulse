@@ -1,34 +1,60 @@
 # Cypress Pulse
 
-A standalone Cypress dashboard for Paseo. It has no dependency on Playwright Pulse and adds no reporting dependencies or configuration files to your tested projects.
+Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, review failures, and open screenshots without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
-## Requirements
+Standalone plugin, with no dependency on Playwright Pulse. Your tested projects keep their existing sources, configuration, and dependencies.
 
-| Component | Supported versions |
-| --- | --- |
-| Paseo app and daemon | `>=0.11.2 <0.12.0` |
-| Project Cypress | `>=16.0.0 <17.0.0` |
-| Helper Node.js | `^22.18.0 || ^24.0.0` |
+<p>
+  <img src="assets/running.png" width="360" alt="Cypress Pulse showing a live run with one of two specs completed">
+  <img src="assets/failure.png" width="360" alt="Completed demo run with a focused failure message and test results">
+</p>
 
-## Setup
+These are real Paseo desktop captures of an isolated example storefront. The final assertion deliberately fails to demonstrate failure reporting; the images are cropped to the plugin panel.
 
-Install from GitHub:
+<details>
+<summary>Light theme example</summary>
+
+<img src="assets/light.png" width="400" alt="Cypress Pulse failure details in Paseo’s Light theme">
+
+</details>
+
+## Get started
 
 ```sh
 paseo plugin install github:mbranicky/cypress-pulse
 ```
 
-Or install a local development checkout:
+1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
+2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
+3. Start a new agent session and ask it to use the **cypress-pulse** skill when running your tests.
 
-```sh
-npm ci
-npm run check
-paseo plugin install /absolute/path/to/cypress-pulse
-```
+For example: “Use Cypress Pulse to run the checkout tests, keeping this project’s usual startup and test settings.”
 
-Open **Cypress Pulse** from the Command Center in a workspace. Its panel lives in Explorer; a header indicator appears while runs are active and briefly after completion.
+<img src="assets/skill-setup.png" width="400" alt="The Install skill button and the user-level folders it will write to">
 
-The plugin writes its dependency-free helper to `~/.local/share/cypress-pulse/cli.mjs`. To check a project's compatibility:
+The installer runs only when clicked. Existing files or links owned by another installation are skipped. Linked instructions follow plugin updates; if Paseo moves its installed copy, the panel offers **Update skill**. **Agent setup** shows the current status and folders at any time.
+
+## Requirements
+
+| Component            | Supported versions |
+| -------------------- | ------------------ | --- | -------- |
+| Paseo app and daemon | `>=0.11.2 <0.12.0` |
+| Project Cypress      | `>=16.0.0 <17.0.0` |
+| Helper Node.js       | `^22.18.0          |     | ^24.0.0` |
+
+## Using the panel
+
+- **Recent runs** switches between independent executions, including concurrent runs in the workspace.
+- The summary shows browser, run mode, elapsed time, completed specs, outcomes, and retries. Batch progress counts specs because unevaluated specs do not yet provide a total test count.
+- Failures appear first. Expand a test to see its file and failure message; **Stack trace** and **Copy error** provide more detail. Use **Failed** to focus the list.
+- **Screenshots** opens Cypress-generated images. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
+- Interactive runs offer **Spec report** after completion. The first five failure messages load automatically; additional failures have **Read failure**.
+
+Pending/skipped-only executions are marked **No executed tests**, so they cannot be mistaken for a successful verification.
+
+## Running tests yourself
+
+The plugin installs a dependency-free helper at `~/.local/share/cypress-pulse/cli.mjs`. Check a project:
 
 ```sh
 node ~/.local/share/cypress-pulse/cli.mjs doctor --project /absolute/path/to/project
@@ -37,49 +63,40 @@ node ~/.local/share/cypress-pulse/cli.mjs doctor --project /absolute/path/to/pro
 Launch a monitored batch run:
 
 ```sh
-node ~/.local/share/cypress-pulse/cli.mjs run --project /absolute/path/to/project -- --spec cypress/e2e/login.cy.ts --browser chrome
+node ~/.local/share/cypress-pulse/cli.mjs run --project /absolute/path/to/project -- --spec cypress/e2e/checkout.cy.ts --browser chrome
 ```
 
-Use `--headed` after `--` for a visible browser. All arguments after `--` are Cypress run options, rather than a shell command. Retain the project's usual application startup, environment, and test selection. Supply helper `--config-file` when choosing an alternative Cypress configuration. An explicit reporter override is preserved; explicit reporter options must use a JSON object.
+Add `--headed` after `--` for a visible browser. Arguments after `--` are Cypress run options. Keep the project’s usual application startup, environment, and test selection. Use helper `--config-file` for an alternative configuration. Reporter overrides are preserved; explicit reporter options must be a JSON object.
 
-The helper creates an external wrapper that imports the existing configuration, composes its hooks, and delegates to its reporter. Neither project sources nor dependency manifests are edited. Normal test-generated artifacts still follow the existing Cypress configuration. Unsupported configuration behavior is an error rather than grounds to rewrite the project.
+The helper imports the project’s existing configuration through a temporary wrapper outside the repository, composes its hooks, and delegates to its reporter. It never edits project configuration or dependency manifests. Tests still generate their normal artifacts according to the existing Cypress configuration.
 
-For interactive tests, start `cypress open` normally and choose a Chromium-family browser. The plugin uses the project's own `cypress tap` CLI to observe the session. No support-file instrumentation is required. At a monorepo root, interactive discovery requires a reachable Cypress installation or a previously observed batch run identifying the Cypress project.
+For interactive tests, start **cypress open** normally and choose a Chromium-family browser. The plugin observes the session through the project’s own **cypress tap** CLI; no support-file instrumentation is needed. At a monorepo root, discovery needs a reachable Cypress installation or a previously observed batch run identifying the Cypress project.
 
-## Agent skill
+## Limits and local data
 
-The repository includes [`skills/cypress-pulse/SKILL.md`](skills/cypress-pulse/SKILL.md). Install that folder into your agent's user-level skill directory, outside tested projects. The plugin does not silently install agent skills or change agent configuration.
+An already running, uninstrumented batch invocation cannot be attached. Interactive monitoring currently supports Chromium-family browsers. This version observes tests; it has no stop or rerun controls.
 
-## Behavior and limits
+The panel lists 30 recent runs and up to 300 test details for the selected run, with failures first. Counts cover the full run. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
 
-- Runs are independent; concurrent invocations do not replace one another.
-- Batch progress counts completed specs. Test totals appear when Cypress provides them.
-- Pending/skipped-only runs are displayed as empty, not as a successful verification.
-- Failures retain their messages and stack text. Screenshots are associated with their spec, rather than guessed from filenames.
-- Interactive reports are checked against session/run identity before and after reading them.
-- The first five interactive failure messages are loaded automatically. Other failed tests have a Read failure action.
-- An uninstrumented batch run already underway cannot be attached to this dashboard.
-- Interactive monitoring currently supports Chromium browsers. There are no stop or rerun controls in this initial version.
-- The current panel displays 30 recent runs and up to 300 test details per selected run. Telemetry files have a 32 MiB read limit; an exceeded limit produces a notice.
+Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No cloud account is required.
 
-Local state lives at `~/.local/state/cypress-pulse` by default. `CYPRESS_PULSE_STATE_DIR` or the helper's `--state-dir` can override it; use the same location for daemon and helper. The helper's `show --run-id ID` command returns normalized JSON results for agents. Telemetry includes test titles, failure text, and artifact paths, so treat it with the same care as your test reports. It does not record a copy of project configuration or environment variables.
-
-## Development
+## Development and verification
 
 ```sh
 npm ci
 npm run check
 npm run test:integration
+paseo plugin install /absolute/path/to/cypress-pulse
 ```
 
-Unit tests cover normalization, retries, empty runs, interruption, runtime gates, session targeting, and report freshness. Real Cypress integration tests use isolated temporary projects to check CommonJS, ESM, and TypeScript configs, asynchronous hooks, tasks, reporter preservation, and unchanged source checksums.
+After changes, typecheck and run `paseo plugin reload cypress-pulse`.
 
-Production collectors and launch helper use Node's standard library. Client modules use Paseo's host-provided SDK, React Native, Zod, and TanStack Query. Cypress is a development-only dependency for isolated compatibility tests; monitored projects use their existing installation.
+Unit tests cover reporting, retries, empty runs, interruption, runtime gates, session targeting, report freshness, and skill installation with ownership protection. Integration tests run real Cypress against isolated CommonJS, ESM, and TypeScript configurations, checking asynchronous hooks, tasks, reporter preservation, and unchanged source checksums.
 
-## Verified initial build
+Verified with Paseo 0.11.2 on macOS, Cypress 16.1.1, and Cypress 16.0.0 for the minimum-version batch path. Live interactive Electron sessions, reruns, failure messages, batch screenshot previews, and one-click skill installation, narrow Explorer layouts, and Ghostty/Light themes were checked in the desktop app. Compatibility checks used Node 22.18.0 and 24.16.0.
 
-The initial build was checked with Paseo 0.11.2 on macOS, Cypress 16.1.1 across CommonJS/ESM/TypeScript configuration formats, and Cypress 16.0.0 for the minimum-version batch path. Live Electron interactive runs, reruns, failure messages, and batch screenshot previews were verified in the Paseo desktop app. Node 22.18.0 and 24.16.0 were used during compatibility investigation.
+Windows, Linux, and mobile clients are not yet verified. Component tests are outside the current compatibility matrix. Supported ranges are enforced; unusual project plugins and configurations may need further compatibility testing.
 
-Windows, Linux, and mobile UI behavior are not yet verified. Component testing is not part of the initial compatibility matrix. Version ranges are enforced, but they are not a claim that every possible project plugin/configuration combination has been tested.
+Collectors, installer, and launch helper use Node’s standard library. The client uses Paseo’s host-provided modules. Cypress is a development-only dependency; monitored projects use their existing installation.
 
-MIT licensed.
+[MIT license](LICENSE).
