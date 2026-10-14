@@ -1,0 +1,6 @@
+{
+  "id": "cypress-pulse",
+  "name": "Cypress Pulse",
+  "description": "Live Cypress run progress and failures alongside your Paseo agents.",
+  "requirements": { "paseo": ">=0.11.2 <0.12.0" }
+}
