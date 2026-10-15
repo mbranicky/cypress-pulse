@@ -160,6 +160,7 @@ export function PulsePanel({
         />
         <Action
           label="Agent setup"
+          icon="Bot"
           colors={colors}
           selected={setup}
           onPress={() => setSetup((value) => !value)}
