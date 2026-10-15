@@ -386,7 +386,8 @@ export function PulsePanel({
               >
                 <Text
                   style={{
-                    flex: 1,
+                    flexGrow: 1,
+                    flexShrink: 0,
                     color: colors.foreground,
                     fontSize: 13,
                     fontWeight: "600",
@@ -394,30 +395,38 @@ export function PulsePanel({
                 >
                   Spec files
                 </Text>
-                <Action
-                  label="All"
-                  colors={colors}
-                  selected={filter === "all"}
-                  onPress={() => setFilter("all")}
-                />
-                <Action
-                  label="Failed"
-                  colors={colors}
-                  selected={filter === "failed"}
-                  onPress={() => setFilter("failed")}
-                />
-                <Action
-                  label="Flaky"
-                  colors={colors}
-                  selected={filter === "flaky"}
-                  onPress={() => setFilter("flaky")}
-                />
-                <Action
-                  label="Skipped / Disabled"
-                  colors={colors}
-                  selected={filter === "skipped"}
-                  onPress={() => setFilter("skipped")}
-                />
+                <View style={{ maxWidth: "100%", flexShrink: 0 }}>
+                  <ScrollView
+                    horizontal
+                    style={{ flexGrow: 0 }}
+                    contentContainerStyle={{ flexDirection: "row", gap: 4 }}
+                  >
+                    <Action
+                      label="All"
+                      colors={colors}
+                      selected={filter === "all"}
+                      onPress={() => setFilter("all")}
+                    />
+                    <Action
+                      label="Failed"
+                      colors={colors}
+                      selected={filter === "failed"}
+                      onPress={() => setFilter("failed")}
+                    />
+                    <Action
+                      label="Flaky"
+                      colors={colors}
+                      selected={filter === "flaky"}
+                      onPress={() => setFilter("flaky")}
+                    />
+                    <Action
+                      label="Skipped / Disabled"
+                      colors={colors}
+                      selected={filter === "skipped"}
+                      onPress={() => setFilter("skipped")}
+                    />
+                  </ScrollView>
+                </View>
               </View>
               {groups.map((spec) => (
                 <SpecGroup

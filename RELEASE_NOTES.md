@@ -5,7 +5,7 @@ Version history from the repository's implementation commits. These entries desc
 ## 0.5.1
 
 - Added **Skipped / Disabled** filtering for Cypress skipped and pending tests, while excluding queued tests in active interactive runs.
-- Filter controls wrap to fit narrow panels.
+- Filter controls move below the heading as one group in narrow panels, keeping all tabs on the same row. Very narrow panels allow horizontal scrolling within that group.
 
 ## 0.5.0
 
