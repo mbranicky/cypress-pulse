@@ -4,6 +4,7 @@ import {
   ScrollView,
   Icon,
   copyText,
+  TextInput,
 } from "@getpaseo/plugin/client/react-native";
 import {
   useRpc,
@@ -35,6 +36,7 @@ export function PulsePanel({
   const [filter, setFilter] = useState<"all" | "failed" | "flaky" | "skipped">(
     "all",
   );
+  const [search, setSearch] = useState("");
   const [history, setHistory] = useState(false);
   const [setup, setSetup] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -52,10 +54,11 @@ export function PulsePanel({
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const query = useQuery({
-    queryKey: ["cypress-pulse", host.id, workspaceId, selected],
-    queryFn: () => read({ workspaceId, runId: selected }),
+    queryKey: ["cypress-pulse", host.id, workspaceId, selected, filter, search],
+    queryFn: () => read({ workspaceId, runId: selected, filter, search }),
     refetchInterval: (data) => (data.state.data?.runs.some(live) ? 2000 : 5000),
     staleTime: 1000,
+    placeholderData: (previous) => previous,
   });
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -213,6 +216,7 @@ export function PulsePanel({
                   setSelected(item.id);
                   setHistory(false);
                   setFilter("all");
+                  setSearch("");
                 }}
                 style={({ pressed }) => ({
                   minHeight: 44,
@@ -428,12 +432,30 @@ export function PulsePanel({
                   </ScrollView>
                 </View>
               </View>
+              <TextInput
+                accessibilityLabel="Search tests and files"
+                placeholder="Search tests and files"
+                placeholderTextColor={colors.foregroundMuted}
+                value={search}
+                maxLength={500}
+                onChangeText={setSearch}
+                style={{
+                  minHeight: 40,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: 6,
+                  paddingHorizontal: 10,
+                  color: colors.foreground,
+                  backgroundColor: colors.surface1,
+                }}
+              />
               {groups.map((spec) => (
                 <SpecGroup
-                  key={`${run.id}:${spec.file}:${filter}`}
+                  key={`${run.id}:${spec.file}:${filter}:${Boolean(search)}`}
                   spec={spec}
                   colors={colors}
                   filter={filter}
+                  searching={Boolean(search)}
                   busy={busy}
                   truncated={Boolean(run.truncated)}
                   tests={run.tests
@@ -480,15 +502,17 @@ export function PulsePanel({
                     lineHeight: 18,
                   }}
                 >
-                  {filter === "skipped"
-                    ? `No skipped or disabled tests${live(run) ? " so far" : ""}.`
-                    : filter === "flaky"
-                      ? `No flaky tests${live(run) ? " so far" : ""}.`
-                      : filter === "failed"
-                        ? `No failures${live(run) ? " so far" : ""}.`
-                        : live(run)
-                          ? "Waiting for the first spec…"
-                          : "No spec details available."}
+                  {search
+                    ? "No tests or files match your search and selected filter."
+                    : filter === "skipped"
+                      ? `No skipped or disabled tests${live(run) ? " so far" : ""}.`
+                      : filter === "flaky"
+                        ? `No flaky tests${live(run) ? " so far" : ""}.`
+                        : filter === "failed"
+                          ? `No failures${live(run) ? " so far" : ""}.`
+                          : live(run)
+                            ? "Waiting for the first spec…"
+                            : "No spec details available."}
                 </Text>
               ) : null}
               {run.truncated ? (

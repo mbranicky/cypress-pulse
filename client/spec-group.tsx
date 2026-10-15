@@ -11,6 +11,7 @@ export function SpecGroup({
   artifacts,
   colors,
   filter,
+  searching = false,
   busy,
   truncated,
   onSource,
@@ -23,6 +24,7 @@ export function SpecGroup({
   artifacts: { index: number; path: string; kind: "screenshot" | "video" }[];
   colors: Colors;
   filter: "all" | "failed" | "flaky" | "skipped";
+  searching?: boolean;
   busy: boolean;
   truncated: boolean;
   onSource(file: string): void;
@@ -33,7 +35,9 @@ export function SpecGroup({
   const [collapsed, setCollapsed] = useState<boolean | null>(null);
   const expanded =
     collapsed === null
-      ? ["running", "failed", "error"].includes(spec.status) || filter !== "all"
+      ? ["running", "failed", "error"].includes(spec.status) ||
+        filter !== "all" ||
+        searching
       : !collapsed;
   const visible = tests.filter(
     (test) =>

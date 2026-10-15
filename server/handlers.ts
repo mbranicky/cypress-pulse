@@ -5,6 +5,8 @@ import { listBatchRuns } from "./store.mjs";
 import { TapCollector, flattenReport } from "./tap.mjs";
 import { runSchema, type PulseRun } from "../shared/rpc";
 
+import { matchesTest } from "../shared/search.mjs";
+import { specKey } from "../shared/specs.mjs";
 import { summarizeSpecs } from "../shared/specs.mjs";
 import { readSpecSource } from "./source.mjs";
 
@@ -55,11 +57,22 @@ export async function collect(directory: string) {
 export function trimRuns(
   runs: PulseRun[],
   selectedId: string | null,
+  search = "",
+  filter = "all",
 ): PulseRun[] {
   return runs.slice(0, 30).map((run) => {
+    const queued =
+      run.source === "interactive" &&
+      ["starting", "running"].includes(run.status);
+    const matching = run.tests.filter((test) =>
+      matchesTest(test, search, filter, queued),
+    );
+    const matchingFiles = new Set(
+      matching.map((test) => specKey(test.file, run.projectRoot)),
+    );
     const tests =
       run.id === selectedId
-        ? [...run.tests]
+        ? [...matching]
             .sort(
               (a, b) =>
                 (a.status === "failed" ? 0 : a.status === "running" ? 1 : 2) -
@@ -69,9 +82,15 @@ export function trimRuns(
         : [];
     return {
       ...run,
-      specs: run.id === selectedId ? summarizeSpecs(run) : [],
+      specs:
+        run.id === selectedId
+          ? summarizeSpecs(run).filter(
+              (spec) =>
+                (!search && filter === "all") || matchingFiles.has(spec.file),
+            )
+          : [],
       tests,
-      truncated: run.id === selectedId && run.tests.length > tests.length,
+      truncated: run.id === selectedId && matching.length > tests.length,
     };
   });
 }

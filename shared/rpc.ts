@@ -86,7 +86,11 @@ export type PulseTest = z.infer<typeof testSchema>;
 const workspace = z.object({ workspaceId: z.string().min(1) });
 export const dashboard = defineRpc({
   name: "dashboard.read",
-  input: workspace.extend({ runId: z.string().optional() }),
+  input: workspace.extend({
+    runId: z.string().optional(),
+    search: z.string().max(500).default(""),
+    filter: z.enum(["all", "failed", "flaky", "skipped"]).default("all"),
+  }),
   output: z.object({
     runs: z.array(runSchema),
     selectedId: z.string().nullable(),

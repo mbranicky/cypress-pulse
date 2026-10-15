@@ -73,7 +73,7 @@ export default function contribute(server: PluginServerContext) {
     const selectedId =
       runs.find((run) => run.id === input.runId)?.id || runs[0]?.id || null;
     return {
-      runs: trimRuns(runs, selectedId),
+      runs: trimRuns(runs, selectedId, input.search, input.filter),
       selectedId,
       notices: [...notices, ...(helperError ? [helperError] : [])],
       helper,
