@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRpc } from "@getpaseo/plugin/client";
 import { TextInput, copyText } from "@getpaseo/plugin/client/react-native";
 import { testInspection, type PulseTest } from "../shared/rpc";
-import { Action, type Colors } from "./ui";
+import { SourcePreview } from "./source-preview";
+import { Action, Divider, type Colors } from "./ui";
 
 export function TestInspection({
   workspaceId,
@@ -13,6 +14,7 @@ export function TestInspection({
   view,
   live,
   colors,
+  onOpenSource,
 }: {
   workspaceId: string;
   runId: string;
@@ -20,6 +22,7 @@ export function TestInspection({
   view: "details" | "logs";
   live: boolean;
   colors: Colors;
+  onOpenSource(file: string): void;
 }) {
   const read = useRpc(testInspection);
   const [search, setSearch] = useState("");
@@ -39,6 +42,44 @@ export function TestInspection({
     : text;
   return (
     <View style={{ gap: 12 }}>
+      {view === "details" &&
+      (query.data?.source || query.data?.sourceNotice) ? (
+        <>
+          <Text
+            style={{
+              color: colors.foreground,
+              fontSize: 14,
+              fontWeight: "600",
+            }}
+          >
+            Test source
+          </Text>
+          {query.data.source ? (
+            <SourcePreview {...query.data.source} colors={colors} />
+          ) : (
+            <Text
+              style={{
+                color: colors.foregroundMuted,
+                fontSize: 12,
+                lineHeight: 18,
+              }}
+            >
+              {query.data.sourceNotice}
+            </Text>
+          )}
+          {query.data.sourceFile ? (
+            <View style={{ alignSelf: "flex-start" }}>
+              <Action
+                label="Open full file"
+                icon="FileCode"
+                colors={colors}
+                onPress={() => onOpenSource(query.data!.sourceFile!)}
+              />
+            </View>
+          ) : null}
+          <Divider colors={colors} />
+        </>
+      ) : null}
       {view === "logs" ? (
         <>
           <TextInput
@@ -97,7 +138,7 @@ export function TestInspection({
           }}
         />
         <Action
-          label="Copy"
+          label={view === "details" ? "Copy report" : "Copy"}
           icon="Copy"
           colors={colors}
           disabled={!shown}

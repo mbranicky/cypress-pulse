@@ -177,6 +177,7 @@ export function TestRow({
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
             <Action
               label="Test details"
+              icon="FileCode"
               colors={colors}
               disabled={busy}
               onPress={() => onInspect(test, "details")}

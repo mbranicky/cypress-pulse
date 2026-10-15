@@ -4,6 +4,8 @@ Version history from the repository's implementation commits. These entries desc
 
 ## 0.5.1
 
+- Added a FileCode icon and a test-source section to Test details, with original line numbers, Copy source, and Open full file. Declaration parsing uses pinned TypeScript and safely reports ambiguous matches.
+
 - Added Test details for all tests and interactive command Logs with search, copy, refresh, hook attribution and retry-attempt selection. Batch log availability and browser-console limitations are stated in the interface.
 
 - Added case-insensitive search across spec paths and full test titles, combined with status filters and applied before the display limit.

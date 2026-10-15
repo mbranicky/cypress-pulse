@@ -122,8 +122,8 @@ export function PulsePanel({
       setBusy(false);
     }
   }
-  async function showSource(file: string) {
-    if (!run) return;
+  async function showSource(file: string, runId = run?.id) {
+    if (!runId) return;
     setBusy(true);
     setDetail({
       title: basename(file),
@@ -131,7 +131,7 @@ export function PulsePanel({
       wide: true,
     });
     try {
-      const source = await readSource({ workspaceId, runId: run.id, file });
+      const source = await readSource({ workspaceId, runId, file });
       setDetail({ title: basename(file), source, wide: true });
     } catch (error) {
       setDetail({ title: "Source unavailable", text: String(error) });
@@ -576,6 +576,9 @@ export function PulsePanel({
             key={`${detail.inspection.runId}:${detail.inspection.test.id}:${detail.inspection.view}`}
             workspaceId={workspaceId}
             {...detail.inspection}
+            onOpenSource={(file) => {
+              void showSource(file, detail.inspection!.runId);
+            }}
             colors={colors}
           />
         ) : detail?.gallery ? (

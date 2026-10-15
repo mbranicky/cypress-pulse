@@ -168,6 +168,16 @@ export const testInspection = defineRpc({
     attempt: z.number().int().min(1).max(1000).optional(),
   }),
   output: z.object({
+    source: z
+      .object({
+        file: z.string(),
+        text: z.string().max(1024 * 1024),
+        startLine: z.number().int().positive(),
+        endLine: z.number().int().positive(),
+      })
+      .optional(),
+    sourceFile: z.string().optional(),
+    sourceNotice: z.string().optional(),
     text: z.string().max(100_000),
     notice: z.string().optional(),
   }),

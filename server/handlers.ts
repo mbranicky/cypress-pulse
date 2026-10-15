@@ -1,3 +1,5 @@
+import { readTestSource } from "./test-source.mjs";
+import { findPluginDirectory } from "./runtime";
 import { describeTest, commandLog } from "./test-details.mjs";
 import type { PaseoApi } from "@getpaseo/client";
 import { readMedia } from "./media.mjs";
@@ -168,19 +170,38 @@ export async function inspectTest(
   if (input.attempt && input.attempt > test.retry + 1)
     throw new Error("That test attempt is unavailable.");
   if (input.view === "details") {
+    let source, sourceNotice;
+    try {
+      source = await readTestSource(
+        run,
+        test.id,
+        directory,
+        await findPluginDirectory(),
+      );
+    } catch (error) {
+      sourceNotice = `Test source unavailable: ${error instanceof Error ? error.message : String(error)}`;
+    }
+    const sourceInfo = {
+      source,
+      sourceNotice,
+      sourceFile: specKey(test.file, run.projectRoot),
+    };
+
     if (run.source === "interactive" && test.status === "failed") {
       try {
         return {
+          ...sourceInfo,
           text: describeTest(test, run, await tap.report(run, test.id)),
         };
       } catch (error) {
         return {
+          ...sourceInfo,
           text: describeTest(test, run),
           notice: `Showing captured metadata. Live failure details are unavailable: ${String(error)}`,
         };
       }
     }
-    return { text: describeTest(test, run) };
+    return { text: describeTest(test, run), ...sourceInfo };
   }
   if (run.source !== "interactive")
     return {
