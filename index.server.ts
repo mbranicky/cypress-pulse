@@ -1,3 +1,7 @@
+import { mkdirSync, writeFileSync, renameSync } from "node:fs";
+import { join } from "node:path";
+import { stateRoot } from "./server/environment.mjs";
+import { captureSettings } from "./shared/settings";
 import type { PluginServerContext } from "@getpaseo/plugin/server";
 import {
   dashboard,
@@ -24,9 +28,32 @@ import {
 } from "./server/skill.mjs";
 
 export default function contribute(server: PluginServerContext) {
+  const settings = server.registerSettings(captureSettings);
+  const mirror = (state: Awaited<ReturnType<typeof settings.read>>) => {
+    const folder = stateRoot();
+    mkdirSync(folder, { recursive: true, mode: 0o700 });
+    const file = join(folder, "capture.json");
+    writeFileSync(
+      `${file}.tmp`,
+      JSON.stringify(
+        state.status === "ready"
+          ? state.values
+          : {
+              error:
+                "Capture settings are invalid. Open Cypress Pulse settings to repair them.",
+            },
+      ),
+      { mode: 0o600 },
+    );
+    renameSync(`${file}.tmp`, file);
+  };
+  const unsubscribe = settings.subscribe(mirror);
   let helper: string | null = null;
   let helperError: string | null = null;
-  void installHelper()
+  void settings
+    .read()
+    .then(mirror)
+    .then(() => installHelper())
     .then((path) => {
       helper = path;
     })
@@ -117,5 +144,8 @@ export default function contribute(server: PluginServerContext) {
       input.file,
     ),
   );
-  return cleanup;
+  return () => {
+    unsubscribe();
+    cleanup();
+  };
 }

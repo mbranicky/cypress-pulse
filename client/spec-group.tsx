@@ -20,9 +20,9 @@ export function SpecGroup({
 }: {
   spec: PulseSpec;
   tests: PulseTest[];
-  artifacts: { index: number; path: string }[];
+  artifacts: { index: number; path: string; kind: "screenshot" | "video" }[];
   colors: Colors;
-  filter: "all" | "failed";
+  filter: "all" | "failed" | "flaky";
   busy: boolean;
   truncated: boolean;
   onSource(file: string): void;
@@ -33,11 +33,14 @@ export function SpecGroup({
   const [collapsed, setCollapsed] = useState<boolean | null>(null);
   const expanded =
     collapsed === null
-      ? ["running", "failed", "error"].includes(spec.status) ||
-        filter === "failed"
+      ? ["running", "failed", "error"].includes(spec.status) || filter !== "all"
       : !collapsed;
   const visible = tests.filter(
-    (test) => filter === "all" || test.status === "failed",
+    (test) =>
+      filter === "all" ||
+      (filter === "flaky"
+        ? test.status === "passed" && test.retry > 0
+        : test.status === "failed"),
   );
   const folder = spec.file.includes("/")
     ? spec.file.slice(0, spec.file.lastIndexOf("/"))
@@ -230,20 +233,19 @@ export function SpecGroup({
                 paddingVertical: 4,
               }}
             >
-              {artifacts.map((item, index) => (
-                <Action
-                  key={item.path}
-                  label={
-                    artifacts.length > 1
-                      ? `Screenshot ${index + 1}`
-                      : "Screenshot"
-                  }
-                  icon="Image"
-                  colors={colors}
-                  disabled={busy}
-                  onPress={() => onArtifact(item.index)}
-                />
-              ))}
+              {(["screenshot", "video"] as const).map((kind) => {
+                const first = artifacts.find((item) => item.kind === kind);
+                return first ? (
+                  <Action
+                    key={kind}
+                    label={kind === "video" ? "Video" : "Screenshots"}
+                    icon={kind === "video" ? "Video" : "Image"}
+                    colors={colors}
+                    disabled={busy}
+                    onPress={() => onArtifact(first.index)}
+                  />
+                ) : null;
+              })}
             </View>
           ) : null}
         </View>

@@ -10,18 +10,13 @@ import {
   type PluginWorkspacePanelProps,
 } from "@getpaseo/plugin/client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  dashboard,
-  interactiveReport,
-  screenshot,
-  specSource,
-} from "../shared/rpc";
+import { dashboard, interactiveReport, specSource } from "../shared/rpc";
 import { Action, Divider, basename, live, tone, StatusIcon } from "./ui";
 import { AgentSetup } from "./setup";
 import { RunSummary } from "./run-summary";
 import { SpecGroup } from "./spec-group";
 import { DetailModal } from "./detail-modal";
-import { ImagePreview } from "./image-preview";
+import { MediaGallery } from "./media-gallery";
 import { SourcePreview } from "./source-preview";
 import { specKey } from "../shared/specs.mjs";
 
@@ -30,21 +25,26 @@ export function PulsePanel({
   host,
   workspaceId,
   layout,
-}: PluginWorkspacePanelProps) {
+  onSettings,
+}: PluginWorkspacePanelProps & { onSettings(): void }) {
   const colors = theme.colors;
   const read = useRpc(dashboard);
   const report = useRpc(interactiveReport);
-  const preview = useRpc(screenshot);
   const readSource = useRpc(specSource);
   const [selected, setSelected] = useState<string>();
-  const [filter, setFilter] = useState<"all" | "failed">("all");
+  const [filter, setFilter] = useState<"all" | "failed" | "flaky">("all");
   const [history, setHistory] = useState(false);
   const [setup, setSetup] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [detail, setDetail] = useState<{
     title: string;
     text?: string;
-    image?: string;
+    gallery?: {
+      runId: string;
+      testId: string;
+      indices: number[];
+      initial: number;
+    };
     source?: { file: string; text: string };
     wide?: boolean;
   } | null>(null);
@@ -63,20 +63,36 @@ export function PulsePanel({
   const run = data?.runs.find((item) => item.id === data.selectedId);
   async function showScreenshot(testId: string, index: number, title: string) {
     if (!run) return;
-    setBusy(true);
-    try {
-      const result = await preview({
-        workspaceId,
+    const attachments =
+      testId === "__spec_artifact__"
+        ? run.artifacts
+        : run.tests.find((test) => test.id === testId)?.attachments || [];
+    const chosen = attachments[index];
+    if (!chosen) return;
+    const indices = attachments
+      .map((item, i) => ({ item, i }))
+      .filter(
+        ({ item }) =>
+          item.kind === chosen.kind &&
+          (testId !== "__spec_artifact__" ||
+            ("file" in item &&
+              specKey(String(item.file), run.projectRoot) ===
+                specKey(
+                  String((chosen as { file?: string }).file),
+                  run.projectRoot,
+                ))),
+      )
+      .map(({ i }) => i);
+    setDetail({
+      title: `${title} · ${chosen.kind === "video" ? "Video" : "Screenshots"}`,
+      gallery: {
         runId: run.id,
         testId,
-        index,
-      });
-      setDetail({ title, image: result.dataUri, wide: true });
-    } catch (error) {
-      setDetail({ title: "Screenshot unavailable", text: String(error) });
-    } finally {
-      setBusy(false);
-    }
+        indices,
+        initial: indices.indexOf(index),
+      },
+      wide: true,
+    });
   }
   async function showReport(testId?: string) {
     if (!run) return;
@@ -111,7 +127,11 @@ export function PulsePanel({
     }
   }
   const groups =
-    run?.specs.filter((spec) => filter === "all" || spec.failed > 0) || [];
+    run?.specs.filter(
+      (spec) =>
+        filter === "all" ||
+        (filter === "flaky" ? spec.flaky > 0 : spec.failed > 0),
+    ) || [];
   return (
     <View style={{ flex: 1, backgroundColor: colors.surface0 }}>
       <View
@@ -132,6 +152,12 @@ export function PulsePanel({
           onPress={() => setHistory((value) => !value)}
         />
         <View style={{ flex: 1 }} />
+        <Action
+          label="Settings"
+          icon="Settings"
+          colors={colors}
+          onPress={onSettings}
+        />
         <Action
           label="Agent setup"
           colors={colors}
@@ -368,6 +394,12 @@ export function PulsePanel({
                   selected={filter === "failed"}
                   onPress={() => setFilter("failed")}
                 />
+                <Action
+                  label="Flaky"
+                  colors={colors}
+                  selected={filter === "flaky"}
+                  onPress={() => setFilter("flaky")}
+                />
               </View>
               {groups.map((spec) => (
                 <SpecGroup
@@ -393,7 +425,6 @@ export function PulsePanel({
                     .map((item, index) => ({ ...item, index }))
                     .filter(
                       (item) =>
-                        item.kind === "screenshot" &&
                         specKey(item.file, run.projectRoot) === spec.file,
                     )}
                   onSource={(file) => {
@@ -422,11 +453,13 @@ export function PulsePanel({
                     lineHeight: 18,
                   }}
                 >
-                  {filter === "failed"
-                    ? `No failures${live(run) ? " so far" : ""}.`
-                    : live(run)
-                      ? "Waiting for the first spec…"
-                      : "No spec details available."}
+                  {filter === "flaky"
+                    ? `No flaky tests${live(run) ? " so far" : ""}.`
+                    : filter === "failed"
+                      ? `No failures${live(run) ? " so far" : ""}.`
+                      : live(run)
+                        ? "Waiting for the first spec…"
+                        : "No spec details available."}
                 </Text>
               ) : null}
               {run.truncated ? (
@@ -465,8 +498,14 @@ export function PulsePanel({
         colors={colors}
         close={() => setDetail(null)}
       >
-        {detail?.image ? (
-          <ImagePreview key={detail.image} uri={detail.image} colors={colors} />
+        {detail?.gallery ? (
+          <MediaGallery
+            key={`${detail.gallery.runId}:${detail.title}`}
+            gallery={detail.gallery}
+            workspaceId={workspaceId}
+            runId={detail.gallery.runId}
+            colors={colors}
+          />
         ) : detail?.source ? (
           <SourcePreview
             file={detail.source.file}

@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and open screenshots without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
+Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
 Standalone plugin, inspired by [Playwright Pulse](https://github.com/stevecastaneda/paseo-plugins/tree/main/playwright-pulse#readme). Your tested projects keep their existing sources, configuration, and dependencies.
 
@@ -49,8 +49,9 @@ The installer runs only when clicked. Existing files or links owned by another i
 - The segmented progress bar distinguishes passed, failed, flaky, pending, and skipped tests. A **flaky** test passed after retrying; it is counted once, separately from clean passes in the legend. Batch totals are labeled **known tests** until all specs have loaded because Cypress does not know the contents of unevaluated files.
 - Tests are grouped by **spec file**, with outcome and retry counts in each header. Running and failing files appear first and start expanded; completed files start collapsed. Click the chevron, folder path, counts, or card background to expand or collapse a file. Test-detail and screenshot controls keep their own actions.
 - Click only the **filename or adjacent arrow** to read its current source, with line numbers and **Copy source**. Desktop source dialogs are up to 1120 px wide, twice the previous width, and shrink to fit smaller screens. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.
-- Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts.
-- **Screenshot** opens Cypress-generated images from the matching file section. The wider viewer preserves the original image and offers **Fit**, **100%**, and **200%** with scrolling. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
+- Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts. **Flaky** shows only files and tests that passed after a retry.
+- **Screenshots** opens a gallery of Cypress-generated images from the matching file section. Use **Previous** and **Next** inside the dialog. The wider viewer preserves the original image and offers **Fit**, **100%**, and **200%** with scrolling. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
+- **Video** opens the Cypress-generated MP4 for a spec, with playback, seeking and fullscreen controls on desktop/web. Cypress records **one video per spec file**, only in `cypress run` (headed or headless), when recording is enabled. Open mode does not record video. Media controls appear when the run reports the artifacts. Images are limited to 8 MB and videos to 32 MB; native mobile clients show a playback availability message.
 - Completed test results update while their spec is still running, in both batch and interactive mode. Interactive runs offer **Spec report** during execution and **Read failure** for completed failures. After the spec finishes, the first five failure messages load automatically. Queued interactive tests are not counted as completed pending tests.
 
 <details>
@@ -68,6 +69,19 @@ The installer runs only when clicked. Existing files or links owned by another i
 </details>
 
 Pending/skipped-only executions are marked **No executed tests**, so they cannot be mistaken for a successful verification.
+
+## Capture settings
+
+Open **Settings** in the panel, or **Settings → Plugins → Cypress Pulse → Capture settings**. Defaults are shared by clients of this daemon host and survive plugin updates:
+
+- **Capture failures:** use the project's setting, enable, or disable automatic run-mode failure screenshots.
+- **Screenshot resolution:** standard or optional 2× capture for Chrome, Chromium and Edge. This changes device pixel ratio; `--screenshot-scale 1` or `2` overrides it per run.
+- **Record spec videos:** use the project's setting, enable, or disable recording.
+- **Video compression:** use the project's setting, uncompressed, or balanced CRF 32 to reduce file size.
+
+Settings apply to future **Pulse helper batch runs**, including headed runs. Active runs and `cypress open` are unaffected. Defaults initially preserve project settings and use standard resolution. Existing environment overrides and explicit Cypress `--config` options take precedence over saved capture defaults. Project sources/configuration are never edited. Project setup hooks can still customize the resolved configuration.
+
+See [Cypress's screenshot and video guide](https://docs.cypress.io/app/guides/screenshots-and-videos) for capture behavior.
 
 ## Running tests yourself
 
@@ -129,3 +143,5 @@ Webpack, its Cypress preprocessor, and ts-loader are pinned development-only reg
 Collectors, installer, and launch helper use Node’s standard library. The client uses Paseo’s host-provided modules. Cypress is a development-only dependency; monitored projects use their existing installation.
 
 [MIT license](LICENSE).
+
+Version 0.5.0 adds the Flaky filter, screenshot galleries, spec-video playback and host capture settings. These were verified in the local Paseo desktop app with real Cypress-generated media.

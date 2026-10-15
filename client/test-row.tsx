@@ -78,6 +78,7 @@ export function TestRow({
             }}
           >
             {test.title}
+            {test.status === "passed" && test.retry > 0 ? " · flaky" : ""}
           </Text>
         </View>
         <Text
@@ -200,18 +201,22 @@ export function TestRow({
                 onPress={onReport}
               />
             ) : null}
-            {test.attachments.map((item, index) =>
-              item.kind === "screenshot" ? (
-                <Action
-                  key={item.path}
-                  label={`Screenshot${item.attempt ? ` · attempt ${item.attempt}` : ""}`}
-                  icon="Image"
-                  colors={colors}
-                  disabled={busy}
-                  onPress={() => onPreview(test, index)}
-                />
-              ) : null,
-            )}
+            {test.attachments.some((item) => item.kind === "screenshot") ? (
+              <Action
+                label="Screenshots"
+                icon="Image"
+                colors={colors}
+                disabled={busy}
+                onPress={() =>
+                  onPreview(
+                    test,
+                    test.attachments.findIndex(
+                      (item) => item.kind === "screenshot",
+                    ),
+                  )
+                }
+              />
+            ) : null}
           </View>
         </View>
       ) : null}

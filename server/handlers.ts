@@ -1,8 +1,7 @@
 import type { PaseoApi } from "@getpaseo/client";
-import { readFile, realpath, stat } from "node:fs/promises";
-import { extname } from "node:path";
+import { readMedia } from "./media.mjs";
 import { canonical } from "./environment.mjs";
-import { inside, listBatchRuns } from "./store.mjs";
+import { listBatchRuns } from "./store.mjs";
 import { TapCollector, flattenReport } from "./tap.mjs";
 import { runSchema, type PulseRun } from "../shared/rpc";
 
@@ -113,24 +112,8 @@ export async function preview(
       : run?.tests.find((test) => test.id === input.testId)?.attachments[
           input.index
         ];
-  if (!run || !attachment || attachment.kind !== "screenshot")
-    throw new Error("That screenshot is unavailable.");
-  const target = await realpath(attachment.path);
-  if (!inside(await realpath(run.projectRoot), target))
-    throw new Error(
-      "Screenshots outside this Cypress project are not previewed.",
-    );
-  if ((await stat(target)).size > 8 * 1024 * 1024)
-    throw new Error("This screenshot is too large to preview.");
-  const mime = {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-  }[extname(target).toLowerCase()];
-  if (!mime) throw new Error("Unsupported screenshot format.");
-  return {
-    dataUri: `data:${mime};base64,${(await readFile(target)).toString("base64")}`,
-  };
+  if (!run || !attachment) throw new Error("That media is unavailable.");
+  return readMedia(run.projectRoot, attachment);
 }
 export function cleanup() {
   cache.clear();

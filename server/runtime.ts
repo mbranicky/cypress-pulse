@@ -15,6 +15,7 @@ const files = [
   "config.cjs",
   "reporter.cjs",
   "screenshots.cjs",
+  "preferences.mjs",
 ];
 export async function findPluginDirectory(): Promise<string> {
   let source: string | undefined;

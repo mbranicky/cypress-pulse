@@ -15,6 +15,8 @@ import {
   VERSION,
 } from "./environment.mjs";
 
+import { readPreferences, captureEnvironment } from "./preferences.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 export function parseArgs(argv) {
   const command = argv.shift() || "help";
@@ -160,6 +162,11 @@ export async function main(argv = process.argv.slice(2)) {
       );
     }
   }
+  const preferences = readPreferences(state);
+  const captureEnv = captureEnvironment(preferences);
+  const scale =
+    options["screenshot-scale"] ||
+    (preferences.screenshotScale === "2" ? "2" : "");
   const id = randomUUID();
   const directory = join(state, "runs", id);
   mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -174,18 +181,16 @@ export async function main(argv = process.argv.slice(2)) {
     startedAt: new Date().toISOString(),
     ownerPid: process.pid,
     mode: args.includes("--headed") ? "headed" : "headless",
-    screenshotScale: options["screenshot-scale"]
-      ? Number(options["screenshot-scale"])
-      : null,
+    screenshotScale: scale ? Number(scale) : null,
     status: "starting",
   };
   atomicallyWrite(join(directory, "manifest.json"), manifest);
   console.error(`Cypress Pulse run ${id}`);
   const env = {
-    ...process.env,
+    ...captureEnv,
     CYPRESS_PULSE_RUN_DIR: directory,
     CYPRESS_PULSE_ORIGINAL_CONFIG: config,
-    CYPRESS_PULSE_SCREENSHOT_SCALE: options["screenshot-scale"] || "",
+    CYPRESS_PULSE_SCREENSHOT_SCALE: scale,
     ...(override ? { CYPRESS_PULSE_REPORTER_OVERRIDE: override } : {}),
     ...(reporterOptions
       ? { CYPRESS_PULSE_REPORTER_OPTIONS: reporterOptions }
