@@ -22,7 +22,7 @@ export function SpecGroup({
   tests: PulseTest[];
   artifacts: { index: number; path: string; kind: "screenshot" | "video" }[];
   colors: Colors;
-  filter: "all" | "failed" | "flaky";
+  filter: "all" | "failed" | "flaky" | "skipped";
   busy: boolean;
   truncated: boolean;
   onSource(file: string): void;
@@ -40,7 +40,9 @@ export function SpecGroup({
       filter === "all" ||
       (filter === "flaky"
         ? test.status === "passed" && test.retry > 0
-        : test.status === "failed"),
+        : filter === "skipped"
+          ? ["pending", "skipped"].includes(test.status)
+          : test.status === "failed"),
   );
   const folder = spec.file.includes("/")
     ? spec.file.slice(0, spec.file.lastIndexOf("/"))

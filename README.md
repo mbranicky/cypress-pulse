@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Current version: **0.5.0** · [Release notes](RELEASE_NOTES.md)
+Current version: **0.5.1** · [Release notes](RELEASE_NOTES.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
@@ -51,7 +51,7 @@ The installer runs only when clicked. Existing files or links owned by another i
 - The segmented progress bar distinguishes passed, failed, flaky, pending, and skipped tests. A **flaky** test passed after retrying; it is counted once, separately from clean passes in the legend. Batch totals are labeled **known tests** until all specs have loaded because Cypress does not know the contents of unevaluated files.
 - Tests are grouped by **spec file**, with outcome and retry counts in each header. Running and failing files appear first and start expanded; completed files start collapsed. Click the chevron, folder path, counts, or card background to expand or collapse a file. Test-detail and screenshot controls keep their own actions.
 - Click only the **filename or adjacent arrow** to read its current source, with line numbers and **Copy source**. Desktop source dialogs are up to 1120 px wide, and shrink to fit smaller screens. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.
-- Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts. **Flaky** shows only files and tests that passed after a retry.
+- Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts. **Flaky** shows only files and tests that passed after a retry. **Skipped / Disabled** shows Cypress skipped and pending tests (including disabled tests). Queued tests in an active interactive run are excluded.
 - **Screenshots** opens a gallery of Cypress-generated images from the matching file section. Use **Previous** and **Next** inside the dialog. The wider viewer preserves the original image and offers **Fit**, **100%**, and **200%** with scrolling. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
 - **Video** opens the Cypress-generated MP4 for a spec, with playback, seeking and fullscreen controls on desktop/web. Cypress records **one video per spec file**, only in `cypress run` (headed or headless), when recording is enabled. Open mode does not record video. Media controls appear when the run reports the artifacts. Images are limited to 8 MB and videos to 32 MB; native mobile clients show a playback availability message.
 - Completed test results update while their spec is still running, in both batch and interactive mode. Interactive runs offer **Spec report** during execution and **Read failure** for completed failures. After the spec finishes, the first five failure messages load automatically. Queued interactive tests are not counted as completed pending tests.

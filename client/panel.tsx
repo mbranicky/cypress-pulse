@@ -32,7 +32,9 @@ export function PulsePanel({
   const report = useRpc(interactiveReport);
   const readSource = useRpc(specSource);
   const [selected, setSelected] = useState<string>();
-  const [filter, setFilter] = useState<"all" | "failed" | "flaky">("all");
+  const [filter, setFilter] = useState<"all" | "failed" | "flaky" | "skipped">(
+    "all",
+  );
   const [history, setHistory] = useState(false);
   const [setup, setSetup] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -130,7 +132,11 @@ export function PulsePanel({
     run?.specs.filter(
       (spec) =>
         filter === "all" ||
-        (filter === "flaky" ? spec.flaky > 0 : spec.failed > 0),
+        (filter === "flaky"
+          ? spec.flaky > 0
+          : filter === "skipped"
+            ? spec.skipped + spec.pending > 0
+            : spec.failed > 0),
     ) || [];
   return (
     <View style={{ flex: 1, backgroundColor: colors.surface0 }}>
@@ -371,7 +377,12 @@ export function PulsePanel({
             ) : null}
             <View style={{ gap: 10 }}>
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 4,
+                }}
               >
                 <Text
                   style={{
@@ -400,6 +411,12 @@ export function PulsePanel({
                   colors={colors}
                   selected={filter === "flaky"}
                   onPress={() => setFilter("flaky")}
+                />
+                <Action
+                  label="Skipped / Disabled"
+                  colors={colors}
+                  selected={filter === "skipped"}
+                  onPress={() => setFilter("skipped")}
                 />
               </View>
               {groups.map((spec) => (
@@ -454,13 +471,15 @@ export function PulsePanel({
                     lineHeight: 18,
                   }}
                 >
-                  {filter === "flaky"
-                    ? `No flaky tests${live(run) ? " so far" : ""}.`
-                    : filter === "failed"
-                      ? `No failures${live(run) ? " so far" : ""}.`
-                      : live(run)
-                        ? "Waiting for the first spec…"
-                        : "No spec details available."}
+                  {filter === "skipped"
+                    ? `No skipped or disabled tests${live(run) ? " so far" : ""}.`
+                    : filter === "flaky"
+                      ? `No flaky tests${live(run) ? " so far" : ""}.`
+                      : filter === "failed"
+                        ? `No failures${live(run) ? " so far" : ""}.`
+                        : live(run)
+                          ? "Waiting for the first spec…"
+                          : "No spec details available."}
                 </Text>
               ) : null}
               {run.truncated ? (

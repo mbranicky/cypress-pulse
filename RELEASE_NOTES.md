@@ -2,6 +2,11 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 0.5.1
+
+- Added **Skipped / Disabled** filtering for Cypress skipped and pending tests, while excluding queued tests in active interactive runs.
+- Filter controls wrap to fit narrow panels.
+
 ## 0.5.0
 
 - Added a **Flaky** filter for tests that passed after a retry.
