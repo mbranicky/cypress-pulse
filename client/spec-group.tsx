@@ -61,33 +61,25 @@ export function SpecGroup({
         style={{
           borderLeftWidth: 3,
           borderLeftColor: color,
-          paddingRight: 10,
-          paddingVertical: 6,
+          paddingRight: 12,
+          paddingVertical: 10,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${expanded ? "Collapse" : "Expand"} ${basename(spec.file) || "unreported spec"}`}
-            accessibilityState={{ expanded }}
-            onPress={(event) => {
-              event.stopPropagation();
-              setCollapsed(expanded);
-            }}
-            style={({ pressed }) => ({
-              width: 40,
-              height: 44,
-              justifyContent: "center",
+          <View
+            style={{
+              width: 31,
               alignItems: "center",
-              opacity: pressed ? 0.6 : 1,
-            })}
+              alignSelf: "flex-start",
+              paddingTop: 2,
+            }}
           >
             <Icon
               name={expanded ? "ChevronDown" : "ChevronRight"}
               size={14}
               color={colors.foregroundMuted}
             />
-          </Pressable>
+          </View>
           <View style={{ flex: 1, gap: 3 }}>
             <Pressable
               accessibilityRole="button"
@@ -100,7 +92,7 @@ export function SpecGroup({
               style={({ pressed }) => ({
                 alignSelf: "flex-start",
                 maxWidth: "100%",
-                minHeight: 44,
+                minHeight: 18,
                 justifyContent: "center",
                 gap: 3,
                 opacity: busy ? 0.5 : pressed ? 0.7 : 1,
@@ -145,12 +137,12 @@ export function SpecGroup({
         </View>
         <View
           style={{
-            marginLeft: 40,
+            marginLeft: 31,
             flexDirection: "row",
             flexWrap: "wrap",
             alignItems: "center",
             gap: 10,
-            paddingBottom: 4,
+            paddingBottom: 0,
           }}
         >
           {spec.status === "running" ? (
