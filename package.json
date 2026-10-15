@@ -1,7 +1,7 @@
 {
   "name": "cypress-pulse",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
   "type": "module",
@@ -28,10 +28,11 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test server/*.test.mjs",
-    "test:integration": "node --test tests/integration.test.mjs",
+    "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",
     "check": "npm run typecheck && npm test"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "7.1.1",
     "@getpaseo/plugin": "0.11.2",
     "@tanstack/react-query": "5.104.2",
     "@types/node": "24.0.0",
@@ -39,7 +40,9 @@
     "cypress": "16.1.1",
     "react": "19.1.0",
     "react-native": "0.81.5",
+    "ts-loader": "9.5.7",
     "typescript": "5.9.3",
+    "webpack": "5.106.2",
     "zod": "4.6.7"
   }
 }

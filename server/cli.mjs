@@ -75,10 +75,13 @@ export function writeWrapper(directory, config) {
       ? ".mjs"
       : ".cjs";
   const file = join(directory, `config${extension}`);
+  // Cypress forks the config process beside --config-file, not --project.
+  // Restore native cwd before importing any project code (including ESM dependencies).
+  const prepare = `process.chdir(${JSON.stringify(dirname(config))});\n`;
   const source =
     type === "module"
-      ? `import original from ${JSON.stringify(pathToFileURL(config).href)};\nimport helper from ${JSON.stringify(pathToFileURL(join(here, "config.cjs")).href)};\nexport default helper.wrapConfig(original);\n`
-      : `const original = require(${JSON.stringify(config)});\nmodule.exports = require(${JSON.stringify(join(here, "config.cjs"))}).wrapConfig(original);\n`;
+      ? `import helper from ${JSON.stringify(pathToFileURL(join(here, "config.cjs")).href)};\n${prepare}const original = await import(${JSON.stringify(pathToFileURL(config).href)});\nexport default helper.wrapConfig(original);\n`
+      : `${prepare}const original = require(${JSON.stringify(config)});\nmodule.exports = require(${JSON.stringify(join(here, "config.cjs"))}).wrapConfig(original);\n`;
   writeFileSync(file, source, { mode: 0o600 });
   return file;
 }
