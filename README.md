@@ -1,5 +1,7 @@
 # Cypress Pulse
 
+Current version: **0.5.0** · [Release notes](RELEASE_NOTES.md)
+
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
 Standalone plugin, inspired by [Playwright Pulse](https://github.com/stevecastaneda/paseo-plugins/tree/main/playwright-pulse#readme). Your tested projects keep their existing sources, configuration, and dependencies.
@@ -48,7 +50,7 @@ The installer runs only when clicked. Existing files or links owned by another i
 - The summary shows browser, run mode, elapsed time, completed tests and specs, outcomes, and retries. Spinners in the panel and workspace header indicate an active run.
 - The segmented progress bar distinguishes passed, failed, flaky, pending, and skipped tests. A **flaky** test passed after retrying; it is counted once, separately from clean passes in the legend. Batch totals are labeled **known tests** until all specs have loaded because Cypress does not know the contents of unevaluated files.
 - Tests are grouped by **spec file**, with outcome and retry counts in each header. Running and failing files appear first and start expanded; completed files start collapsed. Click the chevron, folder path, counts, or card background to expand or collapse a file. Test-detail and screenshot controls keep their own actions.
-- Click only the **filename or adjacent arrow** to read its current source, with line numbers and **Copy source**. Desktop source dialogs are up to 1120 px wide, twice the previous width, and shrink to fit smaller screens. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.
+- Click only the **filename or adjacent arrow** to read its current source, with line numbers and **Copy source**. Desktop source dialogs are up to 1120 px wide, and shrink to fit smaller screens. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.
 - Failures appear first inside each file. Expand a test for its message; **Stack trace** and **Copy error** provide more detail. **Failed** shows only failing files and tests, while their headers keep the full file counts. **Flaky** shows only files and tests that passed after a retry.
 - **Screenshots** opens a gallery of Cypress-generated images from the matching file section. Use **Previous** and **Next** inside the dialog. The wider viewer preserves the original image and offers **Fit**, **100%**, and **200%** with scrolling. Batch screenshots belong to a spec; the plugin does not guess which test owns an image from its filename.
 - **Video** opens the Cypress-generated MP4 for a spec, with playback, seeking and fullscreen controls on desktop/web. Cypress records **one video per spec file**, only in `cypress run` (headed or headless), when recording is enabled. Open mode does not record video. Media controls appear when the run reports the artifacts. Images are limited to 8 MB and videos to 32 MB; native mobile clients show a playback availability message.
@@ -70,6 +72,13 @@ The installer runs only when clicked. Existing files or links owned by another i
 
 Pending/skipped-only executions are marked **No executed tests**, so they cannot be mistaken for a successful verification.
 
+<details>
+<summary>Spec video player</summary>
+
+<img src="assets/video-preview.png" width="720" alt="Cypress spec video in the gallery with playback and seeking controls">
+
+</details>
+
 ## Capture settings
 
 Open **Settings** in the panel, or **Settings → Plugins → Cypress Pulse → Capture settings**. Defaults are shared by clients of this daemon host and survive plugin updates:
@@ -78,6 +87,8 @@ Open **Settings** in the panel, or **Settings → Plugins → Cypress Pulse → 
 - **Screenshot resolution:** standard or optional 2× capture for Chrome, Chromium and Edge. This changes device pixel ratio; `--screenshot-scale 1` or `2` overrides it per run.
 - **Record spec videos:** use the project's setting, enable, or disable recording.
 - **Video compression:** use the project's setting, uncompressed, or balanced CRF 32 to reduce file size.
+
+<img src="assets/settings.png" width="720" alt="Cypress Pulse capture settings for failure screenshots, resolution, video recording and compression">
 
 Settings apply to future **Pulse helper batch runs**, including headed runs. Active runs and `cypress open` are unaffected. Defaults initially preserve project settings and use standard resolution. Existing environment overrides and explicit Cypress `--config` options take precedence over saved capture defaults. Project sources/configuration are never edited. Project setup hooks can still customize the resolved configuration.
 
@@ -105,9 +116,9 @@ For higher-resolution failure captures, opt in for an individual batch run:
 node ~/.local/share/cypress-pulse/cli.mjs run --project /absolute/path/to/project --screenshot-scale 2 -- --spec cypress/e2e/checkout.cy.ts --browser chrome
 ```
 
-This asks Chrome, Chromium, or Edge to use a 2× device pixel ratio. The configured Cypress viewport stays unchanged, but pixel ratio can affect visual assertions. The option is off by default; Electron and Firefox are not supported by this option. It cannot change images already captured by an interactive session. A headless Chrome verification produced 2560 × 1266 pixels instead of 1280 × 633. See [Cypress’s browser-launch documentation](https://docs.cypress.io/api/node-events/browser-launch-api#Set-screen-size-when-running-headless).
+This asks Chrome, Chromium, or Edge to use a 2× device pixel ratio. The configured Cypress viewport stays unchanged, but pixel ratio can affect visual assertions. Standard resolution is the initial default; a saved 2× setting also enables scaling. Electron and Firefox are not supported by this option. It cannot change images already captured by an interactive session. A headless Chrome verification produced 2560 × 1266 pixels instead of 1280 × 633. See [Cypress’s browser-launch documentation](https://docs.cypress.io/api/node-events/browser-launch-api#Set-screen-size-when-running-headless).
 
-The helper imports the project’s existing configuration through a temporary wrapper outside the repository, composes its hooks, and delegates to its reporter. Before loading any project code, it restores the original configuration directory as the config process working directory, matching a native Cypress invocation. This preserves relative file reads and named webpack loader resolution, including when the config lives below the project root. It never edits project configuration or dependency manifests. Tests still generate their normal artifacts according to the existing Cypress configuration.
+The helper imports the project’s existing configuration through a temporary wrapper outside the repository, composes its hooks, and delegates to its reporter. Before loading any project code, it restores the original configuration directory as the config process working directory, matching a native Cypress invocation. This preserves relative file reads and named webpack loader resolution, including when the config lives below the project root. It never edits project configuration or dependency manifests. Tests generate artifacts according to resolved Cypress configuration, including capture defaults and explicit invocation overrides.
 
 For interactive tests, start **cypress open** normally and choose a Chromium-family browser. The plugin observes the session through the project’s own **cypress tap** CLI; no support-file instrumentation is needed. At a monorepo root, discovery needs a reachable Cypress installation or a previously observed batch run identifying the Cypress project.
 
@@ -115,9 +126,9 @@ For interactive tests, start **cypress open** normally and choose a Chromium-fam
 
 An already running, uninstrumented batch invocation cannot be attached. Interactive monitoring currently supports Chromium-family browsers. This version observes tests; it has no stop or rerun controls.
 
-The panel lists 30 recent runs and up to 300 test details for the selected run, with failures and running tests first. Run and file counts cover the full execution, including tests outside the detail limit. Source previews read only specs identified by the run, inside the workspace, with a 1 MiB limit; long lines can be scrolled horizontally. Screenshot previews accept PNG/JPEG files up to 8 MiB. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
+The panel lists 30 recent runs and up to 300 test details for the selected run, with failures and running tests first. Run and file counts cover the full execution, including tests outside the detail limit. Source previews read only specs identified by the run, inside the workspace, with a 1 MiB limit; long lines can be scrolled horizontally. Screenshot previews accept PNG/JPEG files up to 8 MiB; video previews accept MP4 files up to 32 MiB. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
 
-Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No cloud account is required.
+Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No cloud account is required.
 
 ## Development and verification
 
@@ -144,4 +155,4 @@ Collectors, installer, and launch helper use Node’s standard library. The clie
 
 [MIT license](LICENSE).
 
-Version 0.5.0 adds the Flaky filter, screenshot galleries, spec-video playback and host capture settings. These were verified in the local Paseo desktop app with real Cypress-generated media.
+Version 0.5.0’s Flaky filter, screenshot gallery navigation, generated spec-video playback and host capture settings were verified in the local Paseo desktop app. See [release notes](RELEASE_NOTES.md) for the version history.

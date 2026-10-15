@@ -15,6 +15,7 @@
     "paseo-plugin.json",
     "OVERVIEW.md",
     "README.md",
+    "RELEASE_NOTES.md",
     "LICENSE",
     "index.client.tsx",
     "index.server.ts",
