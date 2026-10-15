@@ -44,7 +44,11 @@ export function SpecGroup({
     : "";
   const color = tone(spec.status, colors);
   return (
-    <View
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${expanded ? "Collapse" : "Expand"} ${basename(spec.file) || "spec"}`}
+      accessibilityState={{ expanded }}
+      onPress={() => setCollapsed(expanded)}
       style={{
         borderWidth: 1,
         borderColor: colors.border,
@@ -66,7 +70,10 @@ export function SpecGroup({
             accessibilityRole="button"
             accessibilityLabel={`${expanded ? "Collapse" : "Expand"} ${basename(spec.file) || "unreported spec"}`}
             accessibilityState={{ expanded }}
-            onPress={() => setCollapsed(expanded)}
+            onPress={(event) => {
+              event.stopPropagation();
+              setCollapsed(expanded);
+            }}
             style={({ pressed }) => ({
               width: 40,
               height: 44,
@@ -81,41 +88,47 @@ export function SpecGroup({
               color={colors.foregroundMuted}
             />
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Preview source of ${spec.file}`}
-            disabled={busy || !spec.file}
-            onPress={() => onSource(spec.file)}
-            style={({ pressed }) => ({
-              flex: 1,
-              minHeight: 44,
-              justifyContent: "center",
-              gap: 3,
-              opacity: busy ? 0.5 : pressed ? 0.7 : 1,
-            })}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+          <View style={{ flex: 1, gap: 3 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Preview source of ${spec.file}`}
+              disabled={busy || !spec.file}
+              onPress={(event) => {
+                event.stopPropagation();
+                onSource(spec.file);
+              }}
+              style={({ pressed }) => ({
+                alignSelf: "flex-start",
+                maxWidth: "100%",
+                minHeight: 44,
+                justifyContent: "center",
+                gap: 3,
+                opacity: busy ? 0.5 : pressed ? 0.7 : 1,
+              })}
             >
-              <Text
-                style={{
-                  flexShrink: 1,
-                  color: colors.foreground,
-                  fontSize: 13,
-                  fontWeight: "600",
-                  lineHeight: 18,
-                }}
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
               >
-                {basename(spec.file) || "Unreported spec"}
-              </Text>
-              {spec.file ? (
-                <Icon
-                  name="ArrowUpRight"
-                  size={12}
-                  color={colors.foregroundMuted}
-                />
-              ) : null}
-            </View>
+                <Text
+                  style={{
+                    flexShrink: 1,
+                    color: colors.foreground,
+                    fontSize: 13,
+                    fontWeight: "600",
+                    lineHeight: 18,
+                  }}
+                >
+                  {basename(spec.file) || "Unreported spec"}
+                </Text>
+                {spec.file ? (
+                  <Icon
+                    name="ArrowUpRight"
+                    size={12}
+                    color={colors.foregroundMuted}
+                  />
+                ) : null}
+              </View>
+            </Pressable>
             {folder ? (
               <Text
                 numberOfLines={1}
@@ -128,7 +141,7 @@ export function SpecGroup({
                 {folder}
               </Text>
             ) : null}
-          </Pressable>
+          </View>
         </View>
         <View
           style={{
@@ -147,11 +160,16 @@ export function SpecGroup({
           ) : null}
           {(
             [
-              ["passed", spec.passed, colors.statusSuccess],
+              [
+                "passed",
+                Math.max(0, spec.passed - spec.flaky),
+                colors.statusSuccess,
+              ],
               ["failed", spec.failed, colors.statusDanger],
               ["pending", spec.pending, colors.foregroundMuted],
               ["skipped", spec.skipped, colors.foregroundMuted],
               ["queued", spec.queued, colors.foregroundMuted],
+              ["flaky", spec.flaky, colors.statusWarning],
             ] as const
           )
             .filter(([, count]) => count > 0)
@@ -238,6 +256,6 @@ export function SpecGroup({
           ) : null}
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }

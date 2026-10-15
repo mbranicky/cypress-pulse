@@ -31,6 +31,7 @@ test("spec summaries preserve full counts and separate equal filenames in differ
     running: 0,
     queued: 0,
     retries: 1,
+    flaky: 0,
   });
   assert.equal(groups[1].file, "cypress/b/Cart.cy.ts");
   assert.equal(

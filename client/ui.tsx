@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Icon } from "@getpaseo/plugin/client/react-native";
 import type { PluginWorkspacePanelProps } from "@getpaseo/plugin/client";
 import type { PulseRun } from "../shared/rpc";
@@ -30,6 +30,30 @@ export function statusIcon(status: string) {
         ? "Activity"
         : "Minus";
 }
+export function RunningIcon({ color }: { color: string; size?: number }) {
+  return (
+    <ActivityIndicator
+      size="small"
+      color={color}
+      accessibilityLabel="Tests in progress"
+    />
+  );
+}
+export function StatusIcon({
+  status,
+  color,
+  size = 14,
+}: {
+  status: string;
+  color: string;
+  size?: number;
+}) {
+  return ["starting", "running"].includes(status) ? (
+    <RunningIcon color={color} size={size} />
+  ) : (
+    <Icon name={statusIcon(status)} size={size} color={color} />
+  );
+}
 export function Action({
   label,
   icon,
@@ -53,7 +77,10 @@ export function Action({
       accessibilityLabel={label}
       accessibilityState={{ disabled, selected }}
       disabled={disabled}
-      onPress={onPress}
+      onPress={(event) => {
+        event.stopPropagation();
+        onPress();
+      }}
       style={({ pressed }) => ({
         minHeight: 40,
         minWidth: 40,

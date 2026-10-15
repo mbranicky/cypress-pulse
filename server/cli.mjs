@@ -33,6 +33,7 @@ export function parseArgs(argv) {
         "--cypress-cli",
         "--state-dir",
         "--run-id",
+        "--screenshot-scale",
       ].includes(flag)
     )
       throw new Error(
@@ -93,9 +94,16 @@ function atomicallyWrite(file, data) {
 export async function main(argv = process.argv.slice(2)) {
   checkNode();
   const { command, options, args } = parseArgs([...argv]);
+  if (
+    options["screenshot-scale"] &&
+    !["1", "2"].includes(options["screenshot-scale"])
+  )
+    throw new Error(
+      "--screenshot-scale must be 1 or 2. Use 2 for higher-resolution Chromium screenshots.",
+    );
   if (command === "help" || command === "--help") {
     console.log(
-      "Cypress Pulse\n  run --project PATH [--config-file FILE] -- [Cypress run options]\n  doctor --project PATH\n  show --run-id ID [--state-dir PATH]\nNo files are added to the tested project.",
+      "Cypress Pulse\n  run --project PATH [--config-file FILE] [--screenshot-scale 2] -- [Cypress run options]\n  doctor --project PATH\n  show --run-id ID [--state-dir PATH]\nScreenshot scaling is optional and requires Chrome, Chromium or Edge.\nNo files are added to the tested project.",
     );
     return 0;
   }
@@ -166,6 +174,9 @@ export async function main(argv = process.argv.slice(2)) {
     startedAt: new Date().toISOString(),
     ownerPid: process.pid,
     mode: args.includes("--headed") ? "headed" : "headless",
+    screenshotScale: options["screenshot-scale"]
+      ? Number(options["screenshot-scale"])
+      : null,
     status: "starting",
   };
   atomicallyWrite(join(directory, "manifest.json"), manifest);
@@ -174,6 +185,7 @@ export async function main(argv = process.argv.slice(2)) {
     ...process.env,
     CYPRESS_PULSE_RUN_DIR: directory,
     CYPRESS_PULSE_ORIGINAL_CONFIG: config,
+    CYPRESS_PULSE_SCREENSHOT_SCALE: options["screenshot-scale"] || "",
     ...(override ? { CYPRESS_PULSE_REPORTER_OVERRIDE: override } : {}),
     ...(reporterOptions
       ? { CYPRESS_PULSE_REPORTER_OPTIONS: reporterOptions }

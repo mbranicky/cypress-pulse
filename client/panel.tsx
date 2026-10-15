@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, Image } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import {
   ScrollView,
   Icon,
-  Modal,
   copyText,
 } from "@getpaseo/plugin/client/react-native";
 import {
@@ -17,10 +16,12 @@ import {
   screenshot,
   specSource,
 } from "../shared/rpc";
-import { Action, Divider, basename, live, tone, statusIcon } from "./ui";
+import { Action, Divider, basename, live, tone, StatusIcon } from "./ui";
 import { AgentSetup } from "./setup";
 import { RunSummary } from "./run-summary";
 import { SpecGroup } from "./spec-group";
+import { DetailModal } from "./detail-modal";
+import { ImagePreview } from "./image-preview";
 import { SourcePreview } from "./source-preview";
 import { specKey } from "../shared/specs.mjs";
 
@@ -45,6 +46,7 @@ export function PulsePanel({
     text?: string;
     image?: string;
     source?: { file: string; text: string };
+    wide?: boolean;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const query = useQuery({
@@ -69,7 +71,7 @@ export function PulsePanel({
         testId,
         index,
       });
-      setDetail({ title, image: result.dataUri });
+      setDetail({ title, image: result.dataUri, wide: true });
     } catch (error) {
       setDetail({ title: "Screenshot unavailable", text: String(error) });
     } finally {
@@ -94,10 +96,14 @@ export function PulsePanel({
   async function showSource(file: string) {
     if (!run) return;
     setBusy(true);
-    setDetail({ title: basename(file), text: "Reading spec source…" });
+    setDetail({
+      title: basename(file),
+      text: "Reading spec source…",
+      wide: true,
+    });
     try {
       const source = await readSource({ workspaceId, runId: run.id, file });
-      setDetail({ title: basename(file), source });
+      setDetail({ title: basename(file), source, wide: true });
     } catch (error) {
       setDetail({ title: "Source unavailable", text: String(error) });
     } finally {
@@ -188,8 +194,8 @@ export function PulsePanel({
                       : "transparent",
                 })}
               >
-                <Icon
-                  name={statusIcon(item.status)}
+                <StatusIcon
+                  status={item.status}
                   size={14}
                   color={tone(item.status, colors)}
                 />
@@ -442,7 +448,7 @@ export function PulsePanel({
                   label="Spec report"
                   icon="FileText"
                   colors={colors}
-                  disabled={busy || live(run) || !run.startedAt}
+                  disabled={busy || !run.startedAt}
                   onPress={() => {
                     void showReport();
                   }}
@@ -452,37 +458,30 @@ export function PulsePanel({
           </>
         ) : null}
       </ScrollView>
-      <Modal
+      <DetailModal
         title={detail?.title || "Details"}
         open={Boolean(detail)}
-        onOpenChange={(open) => {
-          if (!open) setDetail(null);
-        }}
+        wide={Boolean(detail?.wide)}
+        colors={colors}
+        close={() => setDetail(null)}
       >
-        <Modal.Content>
-          {detail?.image ? (
-            <Image
-              accessibilityLabel="Cypress failure screenshot"
-              source={{ uri: detail.image }}
-              resizeMode="contain"
-              style={{ width: "100%", height: 440 }}
-            />
-          ) : detail?.source ? (
-            <SourcePreview
-              file={detail.source.file}
-              text={detail.source.text}
-              colors={colors}
-            />
-          ) : (
-            <Text
-              selectable
-              style={{ color: colors.foreground, fontSize: 12, lineHeight: 18 }}
-            >
-              {detail?.text}
-            </Text>
-          )}
-        </Modal.Content>
-      </Modal>
+        {detail?.image ? (
+          <ImagePreview key={detail.image} uri={detail.image} colors={colors} />
+        ) : detail?.source ? (
+          <SourcePreview
+            file={detail.source.file}
+            text={detail.source.text}
+            colors={colors}
+          />
+        ) : (
+          <Text
+            selectable
+            style={{ color: colors.foreground, fontSize: 12, lineHeight: 18 }}
+          >
+            {detail?.text}
+          </Text>
+        )}
+      </DetailModal>
     </View>
   );
 }

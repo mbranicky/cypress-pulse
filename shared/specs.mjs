@@ -25,6 +25,7 @@ export function summarizeSpecs(run) {
         running: 0,
         queued: 0,
         retries: 0,
+        flaky: 0,
       });
     return groups.get(key);
   };
@@ -42,6 +43,7 @@ export function summarizeSpecs(run) {
     )
       item[state]++;
     item.retries += test.retry > 0 ? 1 : 0;
+    item.flaky += test.status === "passed" && test.retry > 0 ? 1 : 0;
   }
   if (active) group(active);
   for (const artifact of run.artifacts) if (artifact.file) group(artifact.file);

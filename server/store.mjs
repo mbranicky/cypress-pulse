@@ -54,11 +54,13 @@ export function reduceRun(manifest, records, exit, alive = true) {
     totalSpecs: null,
     completedSpecs: 0,
     totalTests: null,
+    testTotalComplete: false,
     passed: 0,
     failed: 0,
     pending: 0,
     skipped: 0,
     retries: 0,
+    flaky: 0,
     activeSpec: "",
     tests: [],
     artifacts: [],
@@ -163,6 +165,7 @@ export function reduceRun(manifest, records, exit, alive = true) {
       run.status =
         data.failed > 0 ? "failed" : data.passed > 0 ? "passed" : "empty";
       run.totalTests = data.totalTests ?? null;
+      run.testTotalComplete = true;
       run.endedAt = record.at;
       run.finalCounts = {
         passed: data.passed || 0,
@@ -174,10 +177,19 @@ export function reduceRun(manifest, records, exit, alive = true) {
   }
   run.tests = [...tests.values()];
   run.completedSpecs = doneSpecs.size;
+  if (run.totalTests === null && totals.size) {
+    run.totalTests = [...totals.values()].reduce(
+      (sum, count) => sum + count,
+      0,
+    );
+    run.testTotalComplete =
+      run.totalSpecs !== null && totals.size >= run.totalSpecs;
+  }
   for (const test of run.tests) {
     if (["passed", "failed", "pending", "skipped"].includes(test.status))
       run[test.status]++;
     if (test.retry > 0) run.retries++;
+    if (test.status === "passed" && test.retry > 0) run.flaky++;
   }
   if (run.finalCounts) Object.assign(run, run.finalCounts);
   delete run.finalCounts;

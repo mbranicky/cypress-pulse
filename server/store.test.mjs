@@ -112,6 +112,39 @@ test("process disappearance marks live tests interrupted", () => {
   assert.equal(run.status, "interrupted");
   assert.equal(run.tests[0].status, "interrupted");
 });
+test("batch progress includes completed tests before a spec ends without counting retries twice", () => {
+  const run = reduceRun(
+    manifest,
+    [
+      record("run.begin", { specs: ["a", "b"] }),
+      record("spec.begin", { file: "a" }),
+      record("reporter.begin", { total: 4 }),
+      record("test.end", {
+        file: "a",
+        titlePath: ["flaky"],
+        state: "passed",
+        retry: 1,
+      }),
+      record("test.end", {
+        file: "a",
+        titlePath: ["failed"],
+        state: "failed",
+        retry: 2,
+      }),
+      record("test.begin", { file: "a", titlePath: ["slow"] }),
+    ],
+    null,
+  );
+  assert.equal(run.status, "running");
+  assert.equal(run.completedSpecs, 0);
+  assert.equal(run.totalTests, 4);
+  assert.equal(run.testTotalComplete, false);
+  assert.deepEqual(
+    [run.passed, run.failed, run.flaky, run.retries],
+    [1, 1, 1, 2],
+  );
+  assert.equal(run.tests.length, 3);
+});
 test("workspace containment rejects siblings and traversal", () => {
   assert.equal(inside("/repo", "/repo/package"), true);
   assert.equal(inside("/repo", "/repo-other"), false);

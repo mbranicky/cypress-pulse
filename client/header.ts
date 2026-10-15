@@ -3,6 +3,7 @@ import type {
   PluginButtonRegistration,
 } from "@getpaseo/plugin/client";
 import { briefs } from "../shared/rpc";
+import { RunningIcon } from "./ui";
 
 export function watchHeaders(client: PluginClientContext) {
   let stopped = false;
@@ -43,7 +44,7 @@ export function watchHeaders(client: PluginClientContext) {
             const brief = result.workspaces[id];
             if (brief) {
               const icon = brief.running
-                ? "Activity"
+                ? RunningIcon
                 : ["failed", "error"].includes(brief.status)
                   ? "CircleX"
                   : brief.status === "passed"

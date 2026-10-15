@@ -37,6 +37,8 @@ node ~/.local/share/cypress-pulse/cli.mjs run --project /absolute/project/path -
 
 The helper prints a run ID on stderr and preserves Cypress's exit code. Pass only Cypress run options after `--`. Use helper `--config-file` for an alternative configuration. Existing configuration hooks and reporters are composed for this invocation through files outside the project. The configuration process keeps the original config directory as its working directory, including during imports and preprocessing. If the helper is missing, explain that the Paseo Cypress Pulse plugin needs to be running.
 
+When the user requests higher-resolution failure screenshots, add helper `--screenshot-scale 2` **before** `--`, and use Chrome, Chromium, or Edge. It changes device pixel ratio for that invocation and preserves the configured Cypress viewport. Leave it off for ordinary runs; pixel ratio can affect visual assertions. It does not change screenshots from an already-open interactive session. Never edit support/config files to enable it.
+
 For machine-readable results:
 
 ```sh

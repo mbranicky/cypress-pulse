@@ -63,6 +63,7 @@ export function tapRun(status) {
     testingType: status.testingType || "e2e",
     activeSpec: status.spec || "",
     totalTests: status.totalTests ?? null,
+    testTotalComplete: status.totalTests !== undefined,
     totalSpecs: null,
     completedSpecs: terminal ? 1 : 0,
     passed: results.passed || 0,
@@ -70,6 +71,7 @@ export function tapRun(status) {
     pending: terminal ? results.pending || 0 : 0,
     skipped: terminal ? results.skipped || 0 : 0,
     retries: 0,
+    flaky: 0,
     tests: [],
     errors: error ? [String(error).slice(0, 12000)] : [],
   };
@@ -86,7 +88,9 @@ export function flattenReport(overview, file) {
         titlePath: [...titlePath, test.title],
         status: test.state,
         duration: test.duration || 0,
-        retry: test.retries || 0,
+        retry: Array.isArray(test.attempts)
+          ? Math.max(0, test.attempts.length - 1)
+          : test.retries || 0,
         attachments: [],
       });
     for (const child of suite.suites || []) visit(child, titlePath);
@@ -156,16 +160,25 @@ export class TapCollector {
             projectRoot: canonical(status.projectRoot),
           };
           if (
-            ["passed", "failed"].includes(status.status) &&
+            ["running", "passed", "failed"].includes(status.status) &&
             run.startedAt &&
             !status.error
           ) {
-            let details = this.details.get(run.id);
+            const terminal = ["passed", "failed"].includes(status.status);
+            let details = terminal ? this.details.get(run.id) : undefined;
             if (!details) {
               const overview = await this.report(run);
-              const tests = flattenReport(overview, run.activeSpec);
+              const tests = flattenReport(overview, run.activeSpec).map(
+                (test) => ({
+                  ...test,
+                  status:
+                    !terminal && test.status === "pending"
+                      ? "queued"
+                      : test.status,
+                }),
+              );
               const failures = tests.filter((test) => test.status === "failed");
-              for (const test of failures.slice(0, 5)) {
+              for (const test of terminal ? failures.slice(0, 5) : []) {
                 const result = await this.call(local.cli, run.projectRoot, [
                   "reporter",
                   "--session",
@@ -192,14 +205,30 @@ export class TapCollector {
                 );
               details = {
                 tests,
-                endedAt: new Date(
-                  Date.parse(run.startedAt) + (overview.stats?.duration || 0),
-                ).toISOString(),
+                ...(terminal
+                  ? {
+                      endedAt: new Date(
+                        Date.parse(run.startedAt) +
+                          (overview.stats?.duration || 0),
+                      ).toISOString(),
+                    }
+                  : {}),
+                passed: overview.stats?.passed ?? run.passed,
+                failed: overview.stats?.failed ?? run.failed,
+                pending: terminal
+                  ? (overview.stats?.pending ?? run.pending)
+                  : 0,
+                skipped: terminal
+                  ? (overview.stats?.skipped ?? run.skipped)
+                  : 0,
+                flaky: tests.filter(
+                  (test) => test.status === "passed" && test.retry > 0,
+                ).length,
                 retries: tests.filter((test) => test.retry > 0).length,
               };
               if (this.details.size >= 100)
                 this.details.delete(this.details.keys().next().value);
-              this.details.set(run.id, details);
+              if (terminal) this.details.set(run.id, details);
             }
             Object.assign(run, details);
           }
@@ -227,9 +256,9 @@ export class TapCollector {
       throw new Error(
         "The interactive session has moved to a newer run. Refresh before reading results.",
       );
-    if (!["passed", "failed"].includes(status.status))
+    if (!["running", "passed", "failed"].includes(status.status))
       throw new Error(
-        "Wait for the interactive spec to finish before reading its report.",
+        "Wait for the interactive spec to start before reading its report.",
       );
     const report = await this.call(local.cli, run.projectRoot, [
       "reporter",
@@ -237,6 +266,13 @@ export class TapCollector {
       String(run.sessionPid),
       ...(testId ? ["--test-id", testId] : []),
     ]);
+    if (
+      !testId &&
+      (report.startedAt !== run.startedAt || report.spec !== run.activeSpec)
+    )
+      throw new Error(
+        "The report does not belong to the selected interactive run.",
+      );
     const confirm = await this.call(local.cli, run.projectRoot, [
       "status",
       "--session",

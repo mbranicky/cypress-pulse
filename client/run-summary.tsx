@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { Icon } from "@getpaseo/plugin/client/react-native";
+import { testProgress } from "../shared/progress.mjs";
 import type { PulseRun } from "../shared/rpc";
-import { basename, duration, tone, statusIcon, live, type Colors } from "./ui";
+import { basename, duration, tone, StatusIcon, live, type Colors } from "./ui";
 
 export function RunSummary({
   run,
@@ -12,10 +12,13 @@ export function RunSummary({
   colors: Colors;
   now: number;
 }) {
-  const completed = run.passed + run.failed + run.pending + run.skipped;
-  const total = run.totalSpecs ?? run.totalTests;
-  const done = run.totalSpecs !== null ? run.completedSpecs : completed;
-  const unit = run.totalSpecs !== null ? "specs" : "tests";
+  const progress = testProgress(run);
+  const segmentColor = (status: string) =>
+    status === "flaky"
+      ? colors.statusWarning
+      : status === "pending" || status === "skipped"
+        ? colors.foregroundMuted
+        : tone(status, colors);
   const status =
     run.status === "empty"
       ? "No executed tests"
@@ -25,8 +28,8 @@ export function RunSummary({
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Icon
-          name={statusIcon(run.status)}
+        <StatusIcon
+          status={run.status}
           size={16}
           color={tone(run.status, colors)}
         />
@@ -104,46 +107,82 @@ export function RunSummary({
           ) : null}
         </View>
       ) : null}
-      {total !== null ? (
-        <View style={{ gap: 6 }}>
+      {progress.total > 0 ? (
+        <View style={{ gap: 7 }}>
           <View
             accessibilityRole="progressbar"
             accessibilityValue={{
               min: 0,
-              max: Math.max(1, total),
-              now: Math.min(done, total),
-              text: `${done} of ${total} ${unit} completed`,
+              max: Math.max(1, progress.total),
+              now: progress.completed,
+              text: `${progress.completed} of ${progress.total} ${progress.known ? "known " : ""}tests completed; ${run.failed} failed; ${run.flaky} flaky`,
             }}
             style={{
-              height: 5,
+              height: 7,
+              flexDirection: "row",
+              gap: 2,
               backgroundColor: colors.surface2,
-              borderRadius: 2,
+              borderRadius: 3,
               overflow: "hidden",
             }}
           >
-            <View
-              style={{
-                height: 5,
-                width: `${Math.min(100, (done / Math.max(1, total)) * 100)}%`,
-                backgroundColor: tone(run.status, colors),
-              }}
-            />
+            {progress.segments
+              .filter((segment) => segment.count > 0)
+              .map((segment) => (
+                <View
+                  key={segment.status}
+                  style={{
+                    flexGrow: segment.count,
+                    flexBasis: 0,
+                    height: 7,
+                    backgroundColor: segmentColor(segment.status),
+                  }}
+                />
+              ))}
+            {progress.total > progress.completed ? (
+              <View
+                style={{
+                  flexGrow: progress.total - progress.completed,
+                  flexBasis: 0,
+                }}
+              />
+            ) : null}
           </View>
           <Text
             style={{
-              color: colors.foregroundMuted,
-              fontSize: 11,
+              color: colors.foreground,
+              fontSize: 12,
               fontVariant: ["tabular-nums"],
             }}
           >
-            {done} / {total} {unit} completed
+            <Text style={{ fontWeight: "600" }}>{progress.completed}</Text> /{" "}
+            {progress.total} {progress.known ? "known " : ""}tests completed
           </Text>
+          {progress.known && live(run) ? (
+            <Text style={{ color: colors.foregroundMuted, fontSize: 10 }}>
+              Total updates as Cypress loads each spec.
+            </Text>
+          ) : null}
         </View>
+      ) : null}
+      {run.totalSpecs !== null ? (
+        <Text style={{ color: colors.foregroundMuted, fontSize: 11 }}>
+          {run.completedSpecs} / {run.totalSpecs} specs completed
+        </Text>
       ) : null}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {(
           [
-            ["passed", run.passed, colors.statusSuccess],
+            [
+              "passed",
+              Math.max(0, run.passed - run.flaky),
+              colors.statusSuccess,
+            ],
+            [
+              "flaky",
+              run.flaky,
+              run.flaky ? colors.statusWarning : colors.foregroundMuted,
+            ],
             [
               "failed",
               run.failed,

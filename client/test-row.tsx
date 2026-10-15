@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Icon, copyText } from "@getpaseo/plugin/client/react-native";
 import type { PulseTest } from "../shared/rpc";
-import { Action, duration, statusIcon, tone, type Colors } from "./ui";
+import { Action, duration, StatusIcon, tone, type Colors } from "./ui";
 
 export function TestRow({
   test,
@@ -40,7 +40,10 @@ export function TestRow({
         accessibilityRole="button"
         accessibilityLabel={`${test.title}, ${test.status}. ${expanded ? "Collapse" : "Expand"} details`}
         accessibilityState={{ expanded }}
-        onPress={() => setExpanded((value) => !value)}
+        onPress={(event) => {
+          event.stopPropagation();
+          setExpanded((value) => !value);
+        }}
         style={{
           minHeight: 44,
           flexDirection: "row",
@@ -48,8 +51,8 @@ export function TestRow({
           gap: 8,
         }}
       >
-        <Icon
-          name={statusIcon(test.status)}
+        <StatusIcon
+          status={test.status}
           size={14}
           color={tone(test.status, colors)}
         />

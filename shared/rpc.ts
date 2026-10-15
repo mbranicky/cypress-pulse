@@ -39,6 +39,7 @@ export const specSchema = z.object({
   running: z.number(),
   queued: z.number(),
   retries: z.number(),
+  flaky: z.number().default(0),
 });
 export type PulseSpec = z.infer<typeof specSchema>;
 export const runSchema = z.object({
@@ -58,11 +59,13 @@ export const runSchema = z.object({
   totalSpecs: z.number().nullable(),
   completedSpecs: z.number(),
   totalTests: z.number().nullable(),
+  testTotalComplete: z.boolean().default(false),
   passed: z.number(),
   failed: z.number(),
   pending: z.number(),
   skipped: z.number(),
   retries: z.number(),
+  flaky: z.number().default(0),
   sessionPid: z.number().optional(),
   tests: z.array(testSchema),
   specs: z.array(specSchema).default([]),

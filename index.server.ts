@@ -83,7 +83,7 @@ export default function contribute(server: PluginServerContext) {
           active.length > 1
             ? `Cypress · ${active.length} runs`
             : active.length
-              ? `Cypress · ${completed}${run.totalTests === null ? "" : `/${run.totalTests}`}${run.failed ? ` · ${run.failed} failed` : ""}`
+              ? `Cypress · ${completed}${run.totalTests === null ? "" : `/${run.totalTests}${run.testTotalComplete ? "" : " known"}`}${run.failed ? ` · ${run.failed} failed` : ""}`
               : `Cypress · ${run.status}`;
         workspaces[id] = {
           status: run.status,

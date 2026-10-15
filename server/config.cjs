@@ -1,5 +1,6 @@
 const { emit } = require("./telemetry.cjs");
 const { join, isAbsolute } = require("node:path");
+const { withScreenshotScale } = require("./screenshots.cjs");
 
 const lifecycle = new Set([
   "before:run",
@@ -21,8 +22,13 @@ exports.wrapConfig = function wrapConfig(original) {
       ...original[type],
       async setupNodeEvents(on, resolved) {
         const callbacks = new Map();
+        const scale = process.env.CYPRESS_PULSE_SCREENSHOT_SCALE;
         const capture = (event, handler) => {
-          if (!lifecycle.has(event)) return on(event, handler);
+          if (
+            !lifecycle.has(event) &&
+            !(scale && event === "before:browser:launch")
+          )
+            return on(event, handler);
           callbacks.set(event, [...(callbacks.get(event) || []), handler]);
         };
         // The original callback sees its own config filename rather than our temporary wrapper.
@@ -36,6 +42,13 @@ exports.wrapConfig = function wrapConfig(original) {
           ? await originalSetup(capture, input)
           : undefined;
         const config = returned ? { ...input, ...returned } : input;
+        if (scale)
+          on("before:browser:launch", async (browser, options) => {
+            let result = options;
+            for (const callback of callbacks.get("before:browser:launch") || [])
+              result = (await callback(browser, result)) || result;
+            return withScreenshotScale(browser, result, scale);
+          });
         for (const event of lifecycle) {
           on(event, async (...args) => {
             let result;
