@@ -11,6 +11,8 @@ import {
   type PluginWorkspacePanelProps,
 } from "@getpaseo/plugin/client";
 import { useQuery } from "@tanstack/react-query";
+import type { PulseTest } from "../shared/rpc";
+import { TestInspection } from "./test-inspection";
 import { dashboard, interactiveReport, specSource } from "../shared/rpc";
 import { Action, Divider, basename, live, tone, StatusIcon } from "./ui";
 import { AgentSetup } from "./setup";
@@ -42,6 +44,12 @@ export function PulsePanel({
   const [now, setNow] = useState(Date.now());
   const [detail, setDetail] = useState<{
     title: string;
+    inspection?: {
+      runId: string;
+      test: PulseTest;
+      view: "details" | "logs";
+      live: boolean;
+    };
     text?: string;
     gallery?: {
       runId: string;
@@ -476,6 +484,18 @@ export function PulsePanel({
                       (item) =>
                         specKey(item.file, run.projectRoot) === spec.file,
                     )}
+                  onInspect={(test, view) =>
+                    setDetail({
+                      title: `${test.title} · ${view === "logs" ? "Logs" : "Test details"}`,
+                      inspection: {
+                        runId: run.id,
+                        test,
+                        view,
+                        live: live(run),
+                      },
+                      wide: true,
+                    })
+                  }
                   onSource={(file) => {
                     void showSource(file);
                   }}
@@ -551,7 +571,14 @@ export function PulsePanel({
         colors={colors}
         close={() => setDetail(null)}
       >
-        {detail?.gallery ? (
+        {detail?.inspection ? (
+          <TestInspection
+            key={`${detail.inspection.runId}:${detail.inspection.test.id}:${detail.inspection.view}`}
+            workspaceId={workspaceId}
+            {...detail.inspection}
+            colors={colors}
+          />
+        ) : detail?.gallery ? (
           <MediaGallery
             key={`${detail.gallery.runId}:${detail.title}`}
             gallery={detail.gallery}

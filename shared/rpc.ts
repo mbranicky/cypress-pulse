@@ -158,3 +158,17 @@ export const specSource = defineRpc({
   }),
   output: z.object({ file: z.string(), text: z.string().max(1024 * 1024) }),
 });
+
+export const testInspection = defineRpc({
+  name: "test.inspect",
+  input: workspace.extend({
+    runId: z.string().min(1),
+    testId: z.string().min(1),
+    view: z.enum(["details", "logs"]),
+    attempt: z.number().int().min(1).max(1000).optional(),
+  }),
+  output: z.object({
+    text: z.string().max(100_000),
+    notice: z.string().optional(),
+  }),
+});

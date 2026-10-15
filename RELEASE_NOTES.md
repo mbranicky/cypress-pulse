@@ -4,6 +4,8 @@ Version history from the repository's implementation commits. These entries desc
 
 ## 0.5.1
 
+- Added Test details for all tests and interactive command Logs with search, copy, refresh, hook attribution and retry-attempt selection. Batch log availability and browser-console limitations are stated in the interface.
+
 - Added case-insensitive search across spec paths and full test titles, combined with status filters and applied before the display limit.
 
 - Added **Skipped / Disabled** filtering for Cypress skipped and pending tests, while excluding queued tests in active interactive runs.

@@ -18,6 +18,7 @@ export function SpecGroup({
   onPreview,
   onArtifact,
   onReport,
+  onInspect,
 }: {
   spec: PulseSpec;
   tests: PulseTest[];
@@ -31,6 +32,7 @@ export function SpecGroup({
   onPreview(test: PulseTest, index: number): void;
   onArtifact(index: number): void;
   onReport?: (testId: string) => void;
+  onInspect(test: PulseTest, view: "details" | "logs"): void;
 }) {
   const [collapsed, setCollapsed] = useState<boolean | null>(null);
   const expanded =
@@ -210,6 +212,7 @@ export function SpecGroup({
               colors={colors}
               busy={busy}
               grouped
+              onInspect={onInspect}
               onPreview={onPreview}
               onReport={onReport ? () => onReport(test.id) : undefined}
             />

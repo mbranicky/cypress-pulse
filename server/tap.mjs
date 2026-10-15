@@ -245,7 +245,7 @@ export class TapCollector {
       };
     }
   }
-  async report(run, testId) {
+  async report(run, testId, attempt) {
     const local = this.resolve(run.projectRoot);
     const status = await this.call(local.cli, run.projectRoot, [
       "status",
@@ -265,6 +265,7 @@ export class TapCollector {
       "--session",
       String(run.sessionPid),
       ...(testId ? ["--test-id", testId] : []),
+      ...(attempt ? ["--attempt", String(attempt)] : []),
     ]);
     if (
       !testId &&

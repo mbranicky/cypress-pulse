@@ -9,6 +9,7 @@ export function TestRow({
   colors,
   onPreview,
   onReport,
+  onInspect,
   busy,
   grouped = false,
 }: {
@@ -16,6 +17,7 @@ export function TestRow({
   colors: Colors;
   onPreview(test: PulseTest, index: number): void;
   onReport?: () => void;
+  onInspect(test: PulseTest, view: "details" | "logs"): void;
   busy: boolean;
   grouped?: boolean;
 }) {
@@ -173,6 +175,19 @@ export function TestRow({
             </View>
           ) : null}
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
+            <Action
+              label="Test details"
+              colors={colors}
+              disabled={busy}
+              onPress={() => onInspect(test, "details")}
+            />
+            <Action
+              label="Logs"
+              icon="Logs"
+              colors={colors}
+              disabled={busy}
+              onPress={() => onInspect(test, "logs")}
+            />
             {stackText ? (
               <Action
                 label={stack ? "Hide stack" : "Stack trace"}

@@ -1,3 +1,4 @@
+import { describeTest, commandLog } from "./test-details.mjs";
 import type { PaseoApi } from "@getpaseo/client";
 import { readMedia } from "./media.mjs";
 import { canonical } from "./environment.mjs";
@@ -148,4 +149,53 @@ export async function sourcePreview(
   const run = runs.find((item) => item.id === runId);
   if (!run) throw new Error("That run is unavailable.");
   return readSpecSource(run, file, directory);
+}
+
+export async function inspectTest(
+  directory: string,
+  input: {
+    runId: string;
+    testId: string;
+    view: "details" | "logs";
+    attempt?: number;
+  },
+) {
+  const { runs } = await collect(directory);
+  const run = runs.find((item) => item.id === input.runId);
+  const test = run?.tests.find((item) => item.id === input.testId);
+  if (!run || !test)
+    throw new Error("That test is not part of an available run.");
+  if (input.attempt && input.attempt > test.retry + 1)
+    throw new Error("That test attempt is unavailable.");
+  if (input.view === "details") {
+    if (run.source === "interactive" && test.status === "failed") {
+      try {
+        return {
+          text: describeTest(test, run, await tap.report(run, test.id)),
+        };
+      } catch (error) {
+        return {
+          text: describeTest(test, run),
+          notice: `Showing captured metadata. Live failure details are unavailable: ${String(error)}`,
+        };
+      }
+    }
+    return { text: describeTest(test, run) };
+  }
+  if (run.source !== "interactive")
+    return {
+      text: "",
+      notice:
+        "Command logs were not captured for this batch run. They are available from a running cypress open session through Cypress Tap. Browser console output and process stdout/stderr are not captured as per-test logs.",
+    };
+  const report = await tap.report(run, test.id, input.attempt);
+  const result = commandLog(report);
+  return {
+    text: result.text,
+    notice:
+      "Cypress command history, including cy.log() entries and hook commands. This is not a capture of arbitrary browser console output." +
+      (result.truncated
+        ? " Showing at most 1,000 rows and 100,000 characters."
+        : ""),
+  };
 }

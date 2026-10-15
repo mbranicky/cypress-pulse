@@ -4,6 +4,7 @@ import { stateRoot } from "./server/environment.mjs";
 import { captureSettings } from "./shared/settings";
 import type { PluginServerContext } from "@getpaseo/plugin/server";
 import {
+  testInspection,
   dashboard,
   briefs,
   interactiveReport,
@@ -13,6 +14,7 @@ import {
   installSkill,
 } from "./shared/rpc";
 import {
+  inspectTest,
   workspaceDirectory,
   collect,
   trimRuns,
@@ -136,6 +138,9 @@ export default function contribute(server: PluginServerContext) {
   );
   server.handle(screenshot, async (input, { paseo }) =>
     preview(await workspaceDirectory(paseo, input.workspaceId), input),
+  );
+  server.handle(testInspection, async (input, { paseo }) =>
+    inspectTest(await workspaceDirectory(paseo, input.workspaceId), input),
   );
   server.handle(specSource, async (input, { paseo }) =>
     sourcePreview(

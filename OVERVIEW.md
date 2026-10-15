@@ -15,3 +15,5 @@ The plugin keeps its helper and telemetry outside repositories. Helper versions 
 Open Settings in the panel for capture defaults: failure screenshots, standard or 2× resolution, video recording, and compression. Settings are shared by clients of this daemon host and survive plugin reloads. Initial defaults preserve the project’s capture settings and standard resolution.
 
 Current version: 0.5.1. See [release notes](RELEASE_NOTES.md) for changes in each version.
+
+Each expanded test offers Test details and Logs. Interactive logs include Cypress command history, cy.log entries, hook attribution and retry attempts, with search/copy/refresh controls. They require the original live session/run; browser-console output is not captured. Batch runs retain test metadata and errors but do not capture per-test command logs.
