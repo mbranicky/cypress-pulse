@@ -1,5 +1,5 @@
 {
-  "name": "cypress-pulse",
+  "name": "paseo-cypress-pulse",
   "version": "1.0.0",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
