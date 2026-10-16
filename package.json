@@ -1,6 +1,6 @@
 {
   "name": "cypress-pulse",
-  "version": "0.5.1",
+  "version": "1.0.0",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
   "type": "module",

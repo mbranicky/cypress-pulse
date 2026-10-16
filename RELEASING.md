@@ -25,7 +25,7 @@ controls are included in this release.
    ```sh
    npm ci
    npm run check
-   npm run test:package -- --integration
+   npm run test:package -- --integration --output work/release
    npm audit --omit=dev
    ```
 
@@ -65,7 +65,9 @@ Create the release artifact with:
 npm run pack:release
 ```
 
-It writes `work/release/cypress-pulse-VERSION.tgz`. This stages the npm manifest
+It writes `work/release/cypress-pulse-VERSION.tgz`. To keep the exact tarball that
+passed package integration checks, use
+`npm run test:package -- --integration --output work/release` instead. This stages the npm manifest
 without changing the source checkout: Git retains the locked
 `npm ci --omit=dev --ignore-scripts` preparation command; the npm artifact omits
 that command because npm already installs production dependencies. Use this
