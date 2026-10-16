@@ -59,6 +59,14 @@ The installer runs only when clicked. Existing files or links owned by another i
 - Completed test results update while their spec is still running, in both batch and interactive mode. Interactive runs offer **Spec report** during execution and **Read failure** for completed failures. After the spec finishes, the first five failure messages load automatically. Queued interactive tests are not counted as completed pending tests.
 
 <details>
+<summary>Test details and command logs</summary>
+
+<img src="assets/test-details.png" width="720" alt="Test details with original source line numbers, Copy source, Open full file, and captured outcome metadata">
+<img src="assets/logs.png" width="720" alt="Interactive Cypress command log with search, retry-attempt navigation, hook messages and cy.log entries">
+
+</details>
+
+<details>
 <summary>Source preview example</summary>
 
 <img src="assets/source-preview.png" width="520" alt="Read-only Cypress spec source preview with line numbers and Copy source">
