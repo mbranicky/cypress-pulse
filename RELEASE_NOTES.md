@@ -4,6 +4,9 @@ Version history from the repository's implementation commits. These entries desc
 
 ## 0.5.1
 
+- Added main-branch CI and release package verification, locked production dependency preparation for Git installations, a publishable npm shrinkwrap, and a documented release procedure.
+- Fixed helper startup through symlinked paths, production-only Paseo compilation, and malformed telemetry hiding otherwise valid runs.
+
 - Refreshed every documentation screenshot for the current search controls and button icons; added test-source details and interactive command-log examples.
 
 - Added a FileCode icon and a test-source section to Test details, with original line numbers, Copy source, and Open full file. Declaration parsing uses pinned TypeScript and safely reports ambiguous matches.

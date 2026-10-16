@@ -44,7 +44,7 @@ test(
         const execution = exec(
           process.execPath,
           [
-            join(root, "server/cli.mjs"),
+            (process.env.CYPRESS_PULSE_TEST_HELPER || join(root, "server/cli.mjs")),
             "run",
             "--project",
             project,
