@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { reduceRun, inside, listBatchRuns } from "./store.mjs";
+import { reduceRun, inside, listBatchRuns, readBatchRun } from "./store.mjs";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -191,5 +191,27 @@ test("concurrent run journals remain independent and a forged workspace root is 
     assert.deepEqual(runs.map((run) => run.passed).sort(), [1, 2]);
   } finally {
     await rm(state, { recursive: true, force: true });
+  }
+});
+
+test("corrupt and structurally invalid records do not hide a valid run", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "pulse-corrupt-"));
+  try {
+    await writeFile(join(directory, "manifest.json"), JSON.stringify(manifest));
+    await writeFile(join(directory, "events-1.jsonl"), [
+      JSON.stringify(record("run.begin", {specs:["a.cy.js"]})),
+      "{broken}",
+      JSON.stringify(record("spec.end", {file:"a.cy.js", tests:[null]})),
+      JSON.stringify(record("run.begin", {specs:"invalid"})),
+      JSON.stringify(record("run.end", {passed:1, failed:0, totalTests:1})),
+      '{"partial":',
+    ].join("\n"));
+    await writeFile(join(directory, "exit.json"), JSON.stringify({code:0, endedAt:manifest.startedAt}));
+    const run = await readBatchRun(directory);
+    assert.equal(run.status, "passed");
+    assert.equal(run.passed, 1);
+    assert.ok(run.errors.some((message) => /telemetry record/i.test(message)));
+  } finally {
+    await rm(directory, {recursive:true, force:true});
   }
 });

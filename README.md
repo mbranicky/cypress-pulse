@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Current version: **0.5.1** · [Release notes](RELEASE_NOTES.md)
+Current version: **0.5.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
@@ -138,16 +138,16 @@ An already running, uninstrumented batch invocation cannot be attached. Interact
 
 The panel lists 30 recent runs and up to 300 test details for the selected run, with failures and running tests first. Run and file counts cover the full execution, including tests outside the detail limit. Source previews read only specs identified by the run, inside the workspace, with a 1 MiB limit; long lines can be scrolled horizontally. Screenshot previews accept PNG/JPEG files up to 8 MiB; video previews accept MP4 files up to 32 MiB. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
 
-Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No cloud account is required.
+Run data is stored on the daemon host in `~/.local/state/cypress-pulse` and sent through Paseo to connected clients when viewed. Agent-invoked helper output can also enter the agent conversation and reach its configured provider. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No Cypress Cloud account is required. History is not automatically deleted; display limits do not limit disk retention. See [data retention and removal](RELEASING.md#data-retention-and-removal) for cleanup guidance.
 
 ## Development and verification
 
-[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests on every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. The workflow also supports manual runs.
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests on every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
 
 ```sh
 npm ci
 npm run check
-npm run test:integration
+npm run test:package -- --integration
 paseo plugin install /absolute/path/to/cypress-pulse
 ```
 
@@ -159,7 +159,7 @@ Unit tests cover reporting, retries, empty runs, interruption, runtime gates, se
 
 Verified with Paseo 0.11.2 on macOS, Cypress 16.1.1, and Cypress 16.0.0 for the minimum-version batch path. Live interactive Electron sessions, reruns, failure messages, batch screenshot previews, one-click skill installation, grouped file sections, source previews, narrow Explorer layouts, and Ghostty/Light themes were checked in the desktop app. Compatibility checks used Node 22.18.0 and 24.16.0. The webpack regression cases also passed on Cypress 16.0.0 with Node 22.18.0 in headed Chrome. Chrome open-mode partial results were also verified on Cypress 16.0.0 with Node 22.18.0. Live partial results, live failure reports, spinners, card interactions, wide source dialogs, original-pixel image zoom, and a 320 px Explorer panel were verified in Paseo for 0.4.0.
 
-Windows, Linux, and mobile clients are not yet verified. Component tests are outside the current compatibility matrix. Supported ranges are enforced; unusual project plugins and configurations may need further compatibility testing.
+Ubuntu batch integration tests pass in CI on both supported Node lines. Windows, Linux desktop, and mobile clients are not yet verified. Component tests are outside the current compatibility matrix. Supported ranges are enforced; unusual project plugins and configurations may need further compatibility testing.
 
 Webpack, its Cypress preprocessor, and ts-loader are pinned development-only regression dependencies. They are not installed in monitored projects or required by the helper.
 
@@ -170,3 +170,7 @@ Collectors, installer, and launch helper use Node’s standard library. The clie
 Version 0.5.0’s Flaky filter, screenshot gallery navigation, generated spec-video playback and host capture settings were verified in the local Paseo desktop app. See [release notes](RELEASE_NOTES.md) for the version history.
 
 Test source extraction uses the pinned TypeScript parser as a plugin runtime dependency. It parses declarations without importing or executing test code. The batch helper remains dependency-free; monitored projects need no added packages.
+
+The npm release artifact is prepared with `npm run pack:release`. Git installations run locked production dependency preparation; npm artifacts omit that redundant step. See the [release procedure](RELEASING.md) before versioning or publishing.
+
+The current preparation findings and remaining publication gates are recorded in the repository [release-readiness report](https://github.com/mbranicky/cypress-pulse/blob/main/RELEASE_READINESS.md).

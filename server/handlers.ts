@@ -1,7 +1,7 @@
 import { readTestSource } from "./test-source.mjs";
 import { findPluginDirectory } from "./runtime";
 import { describeTest, commandLog } from "./test-details.mjs";
-import type { PaseoApi } from "@getpaseo/client";
+import type { PluginHandlerContext } from "@getpaseo/plugin/server";
 import { readMedia } from "./media.mjs";
 import { canonical } from "./environment.mjs";
 import { listBatchRuns } from "./store.mjs";
@@ -22,7 +22,7 @@ const inflight = new Map<
   string,
   Promise<{ runs: PulseRun[]; notices: string[] }>
 >();
-export async function workspaceDirectory(paseo: PaseoApi, id: string) {
+export async function workspaceDirectory(paseo: PluginHandlerContext["paseo"], id: string) {
   const workspace = await paseo.workspaces.ref(id).refresh();
   if (!workspace) throw new Error("This workspace is unavailable.");
   return canonical(workspace.workspaceDirectory || workspace.projectRootPath);

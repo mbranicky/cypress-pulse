@@ -5,6 +5,35 @@ import { promisify } from "node:util";
 import { stateRoot } from "./environment.mjs";
 
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
+const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const strings = (value) => Array.isArray(value) && value.every((item) => typeof item === "string");
+const optional = (value, validate) => value === undefined || validate(value);
+const count = (value) => Number.isInteger(value) && value >= 0;
+function validRecord(record) {
+  if (!object(record) || record.v !== 1 || typeof record.kind !== "string" ||
+      typeof record.at !== "string" || !Number.isFinite(Date.parse(record.at))) return false;
+  const data = record.data ?? {};
+  if (!object(data)) return false;
+  if (record.kind === "run.begin") return optional(data.specs, strings);
+  if (record.kind === "run.end")
+    return ["passed", "failed", "pending", "skipped", "totalTests"].every((key) => optional(data[key], count));
+  if (record.kind === "reporter.begin") return optional(data.total, count);
+  if (record.kind.startsWith("test."))
+    return optional(data.file, (value) => typeof value === "string") &&
+      optional(data.titlePath, strings) && optional(data.title, (value) => typeof value === "string") &&
+      optional(data.retry, count) && optional(data.duration, (value) => Number.isFinite(value) && value >= 0) &&
+      (record.kind !== "test.end" || ["passed", "failed", "pending", "skipped"].includes(data.state));
+  if (record.kind === "spec.begin" || record.kind === "spec.end") {
+    if (typeof data.file !== "string") return false;
+    return optional(data.screenshots, strings) && optional(data.video, (value) => value === null || typeof value === "string") &&
+      optional(data.tests, (value) => Array.isArray(value) && value.every((test) =>
+        object(test) && strings(test.titlePath) && test.titlePath.length > 0 &&
+        ["passed", "failed", "pending", "skipped"].includes(test.state) &&
+        optional(test.duration, (value) => Number.isFinite(value) && value >= 0) &&
+        optional(test.attempts, Array.isArray)));
+  }
+  return true;
+}
 export function inside(root, path) {
   const delta = relative(root, path);
   return (
@@ -237,12 +266,8 @@ export async function readBatchRun(directory) {
     for (const line of content.split("\n").slice(0, -1)) {
       try {
         const record = JSON.parse(line);
-        if (
-          record.v === 1 &&
-          typeof record.kind === "string" &&
-          typeof record.at === "string"
-        )
-          records.push(record);
+        if (validRecord(record)) records.push(record);
+        else warnings.push("An unsupported telemetry record could not be read.");
       } catch {
         warnings.push("A telemetry record could not be read.");
       }

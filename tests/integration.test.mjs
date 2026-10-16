@@ -90,7 +90,7 @@ for (const format of ["cjs", "mjs", "ts", "esm-ts"]) {
           await exec(
             process.execPath,
             [
-              join(root, "server", "cli.mjs"),
+              (process.env.CYPRESS_PULSE_TEST_HELPER || join(root, "server", "cli.mjs")),
               "run",
               "--project",
               project,

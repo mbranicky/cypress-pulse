@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+          cache-dependency-path: npm-shrinkwrap.json
 
       - name: Install dependencies
         run: npm ci
@@ -40,5 +41,8 @@ jobs:
           google-chrome --version
           xvfb-run --auto-servernum npx --no-install cypress verify
 
-      - name: Run Cypress integration tests
-        run: xvfb-run --auto-servernum npm run test:integration
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Verify production package and run Cypress integration tests
+        run: xvfb-run --auto-servernum npm run test:package -- --integration

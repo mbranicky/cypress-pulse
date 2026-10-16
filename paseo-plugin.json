@@ -16,5 +16,13 @@
     "assets/video-preview.png",
     "assets/test-details.png",
     "assets/logs.png"
+  ],
+  "build": [
+    [
+      "npm",
+      "ci",
+      "--omit=dev",
+      "--ignore-scripts"
+    ]
   ]
 }
