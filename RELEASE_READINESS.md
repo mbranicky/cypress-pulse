@@ -14,9 +14,9 @@ GitHub release or npm publication has been created by this preparation.
   source extraction, and both direct and npm-linked CLI startup.
 - Extended CI to audit production dependencies and test the production artifact
   on Node 22.18.0 and 24.x. The workflow retains every-push-to-main and manual
-  triggers. The new workflow still needs its first remote run after these changes
-  are committed and pushed.
-- Typechecking and regression tests pass locally. The production artifact passed
+  triggers. Both jobs passed in the [verification run](https://github.com/mbranicky/cypress-pulse/actions/runs/38883186206)
+  for implementation commit `9ac0219`.
+- Typechecking and all 39 regression tests pass locally. The production artifact passed
   all seven real Cypress integrations on Node 22.18.0 and 24.16.0: CommonJS, ESM,
   TypeScript, webpack/ts-loader, live outcomes and doubled screenshot dimensions.
 - The production-only artifact loads with status `running` in a separate Paseo
@@ -54,8 +54,8 @@ GitHub release or npm publication has been created by this preparation.
 
 ## Before the release
 
-1. Commit/push this preparation and require the updated CI to pass on both Node
-   versions. Review the final diff and package listing.
+1. Review and merge [preparation PR #1](https://github.com/mbranicky/cypress-pulse/pull/1).
+   Both Node jobs passed; main will run the same checks again on merge.
 2. Confirm the documented supported scope and the treatment of development-only
    advisories. Broader platform or component-test support needs its own testing.
 3. Authenticate the intended npm publishing account. `npm whoami` currently
