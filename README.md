@@ -142,6 +142,8 @@ Data stays on the daemon host in `~/.local/state/cypress-pulse`. `CYPRESS_PULSE_
 
 ## Development and verification
 
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests on every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. The workflow also supports manual runs.
+
 ```sh
 npm ci
 npm run check
