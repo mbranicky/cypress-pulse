@@ -2,6 +2,19 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.0.0
+
+First stable release.
+
+- Follow Cypress end-to-end runs in Paseo’s Explorer panel and workspace header, with live passed, failed, flaky, pending and skipped outcomes grouped by spec file.
+- Filter and search tests, inspect failure details and original-line source snippets, and browse full spec source, screenshots and spec videos.
+- Inspect interactive Cypress command logs, hook messages and retry attempts through the original live session.
+- Install the agent skill with one click and configure host capture defaults without editing tested project sources or configuration.
+- Preserve existing project hooks, reporters and webpack loader resolution through the standalone monitored batch helper.
+- Ship locked production dependencies and verify clean package installations, interruptions, stale reports, source/media boundaries and real Cypress runs in CI on both supported Node lines.
+
+Supported scope: macOS desktop, Paseo app/daemon `>=0.11.2 <0.12.0`, Cypress `>=16.0.0 <17.0.0` end-to-end tests, and helper Node `^22.18.0 || ^24.0.0`. Ubuntu CI covers batch operation; Windows, Linux desktop, mobile clients and component testing remain unverified. Interactive logs require the original Chromium-family session; batch command logs, arbitrary browser-console capture, and stop/rerun controls are outside this release.
+
 ## 0.5.1
 
 - Added main-branch CI and release package verification, locked production dependency preparation for Git installations, a publishable npm shrinkwrap, and a documented release procedure.

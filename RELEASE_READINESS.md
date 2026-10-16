@@ -1,6 +1,6 @@
 # 1.0 release readiness
 
-Preparation performed on 2026-10-16. The plugin remains **0.5.1**; no version tag,
+Version **1.0.0** prepared on 2026-10-16 at the maintainer’s request. No version tag,
 GitHub release or npm publication has been created by this preparation.
 
 ## Completed
@@ -52,16 +52,25 @@ GitHub release or npm publication has been created by this preparation.
   before reduction; invalid records produce a notice while valid results remain
   available. A corrupt-record regression covers this behavior.
 
-## Before the release
+## Publication status
 
-1. Review and merge [preparation PR #1](https://github.com/mbranicky/cypress-pulse/pull/1).
-   Both Node jobs passed; main will run the same checks again on merge.
-2. Confirm the documented supported scope and the treatment of development-only
-   advisories. Broader platform or component-test support needs its own testing.
-3. Authenticate the intended npm publishing account. `npm whoami` currently
-   returns `ENEEDAUTH`; no credentials were added during preparation.
-4. On the maintainer's explicit request, bump to 1.0.0, write its release notes,
-   and repeat the package/version checks on that revision.
-5. Follow [the release procedure](RELEASING.md) to tag and publish the exact checked
-   artifact, then verify the exact npm version in Paseo. Registry submission is a
-   separate publication step.
+- [Preparation PR #1](https://github.com/mbranicky/cypress-pulse/pull/1) is merged. Both main-branch jobs passed in the [verification run](https://github.com/mbranicky/cypress-pulse/actions/runs/38885222100).
+- npm authentication is confirmed as `mbranicky`. No credentials are included in the source or artifact.
+- The package, helper, dependency lock and current-version documentation now identify version 1.0.0. Historical entries keep their original versions.
+- Publication, version tagging and a GitHub release remain pending explicit maintainer authorization.
+
+## 1.0.0 artifact verification
+
+- Typechecking and all 39 regression tests passed. Clean production packages passed all seven real Cypress integrations on Node 22.18.0 and 24.16.0.
+- The exact retained tarball installed and reloaded with status `running` in an isolated Paseo 0.11.4 daemon. Its installed helper reports version 1.0.0. The temporary daemon was stopped after verification.
+- The production dependency audit still reports zero known vulnerabilities.
+- Local artifact: `work/release/cypress-pulse-1.0.0.tgz`; checksum and machine-readable evidence are saved alongside it. The tarball is ignored by Git and has not been uploaded to npm.
+- SHA-256: `6b0d3c54ae4d8f89e4a52efbdec2474e56d64beaa7cca4867b08bf07f8344fa0`.
+- CI for the version preparation is the final verification before merging; publication and tagging remain separate authorized steps.
+
+## Before publication
+
+1. Review and merge the version preparation, require its checks to pass, and inspect the final tarball and checksum. Keep the existing supported scope and documented development-only advisories in view.
+2. Follow [the release procedure](RELEASING.md) to tag and publish the exact checked 1.0.0 artifact only after authorization.
+3. Verify the exact npm version in a test Paseo daemon, then update the primary installation instructions to the published package.
+4. Submit to the Paseo registry separately after published-artifact verification.

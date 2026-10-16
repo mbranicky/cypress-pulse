@@ -71,6 +71,15 @@ try {
     });
     process.stdout.write(result.stdout);
   }
+  const outputIndex = process.argv.indexOf("--output");
+  if (outputIndex !== -1) {
+    const output = process.argv[outputIndex + 1];
+    assert.ok(output && !output.startsWith("--"), "--output requires a directory");
+    const destination = resolve(output);
+    await mkdir(destination, { recursive: true });
+    await cp(join(scratch, artifact.filename), join(destination, artifact.filename));
+    console.log(`Saved verified package: ${join(destination, artifact.filename)}`);
+  }
   console.log(`Verified production-only ${pkg.name}@${pkg.version}: ${artifact.entryCount} packaged files, source parser, CLI and installed-module regression tests.`);
 } catch (error) {
   if (error.stdout) process.stderr.write(error.stdout);
