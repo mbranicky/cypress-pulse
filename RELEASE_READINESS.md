@@ -1,9 +1,7 @@
 # 1.0 release readiness
 
-Version **1.0.0** prepared on 2026-10-16. The npm package is now named
-**paseo-cypress-pulse**. No npm publication or GitHub release has been created.
-The existing `v1.0.0` tag still points to commit `8e13c9c`, before the npm rename;
-it has not been moved or replaced.
+**paseo-cypress-pulse@1.0.0** was published to [npmjs.com](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.0.0) on 2026-10-16 after explicit maintainer authorization.
+The [GitHub release](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.0.0) uses tag `paseo-cypress-pulse-v1.0.0` at commit `10d9e18`. The obsolete `v1.0.0` tag was deleted at the maintainer’s request.
 
 ## Completed
 
@@ -59,20 +57,18 @@ it has not been moved or replaced.
 - [Preparation PR #1](https://github.com/mbranicky/cypress-pulse/pull/1) is merged. Both main-branch jobs passed in the [verification run](https://github.com/mbranicky/cypress-pulse/actions/runs/38885222100).
 - npm authentication is confirmed as `mbranicky`. No credentials are included in the source or artifact.
 - The package, helper, dependency lock and current-version documentation now identify version 1.0.0. Historical entries keep their original versions.
-- npm publication and a GitHub release remain pending explicit maintainer authorization. The existing `v1.0.0` tag must be addressed deliberately before the renamed package is released.
+- The GitHub release and npm publication are complete. npm marks version 1.0.0 as `latest`, and its SHA-512 integrity and SHA-1 shasum match the verified tarball.
 
 ## 1.0.0 artifact verification
 
 - Typechecking and all 39 regression tests passed locally. The renamed production package passed all seven real Cypress integrations on Node 24.16.0; CI validates the same package checks on both supported Node lines.
 - The exact retained tarball installed and reloaded with status `running` in an isolated Paseo 0.11.4 daemon. Its installed helper reports version 1.0.0. The temporary daemon was stopped after verification.
 - The production dependency audit still reports zero known vulnerabilities.
-- Local artifact: `work/release/paseo-cypress-pulse-1.0.0.tgz`; checksum and machine-readable evidence are saved alongside it. The tarball is ignored by Git and has not been uploaded to npm.
+- Local artifact: `work/release/paseo-cypress-pulse-1.0.0.tgz`; checksum and machine-readable evidence are saved alongside it. The tarball is ignored by Git; these exact bytes are published to npm and attached to the GitHub release.
 - SHA-256: `48ecbdbac7005e0f581a11bac7ff69352d6dfaf2ba96e441b4c8d2c7d10ff77b`.
-- CI for the npm rename is the final verification before merging. No tag has been changed and no npm package has been published.
+- [Main-branch CI](https://github.com/mbranicky/cypress-pulse/actions/runs/38907220363) passed on Node 22.18.0 and 24.x for the tagged source.
+- A fresh `npm:paseo-cypress-pulse@1.0.0` installation through Paseo succeeded in an isolated daemon. Plugin activation, helper doctor (version 1.0.0), skill installation and reload all passed. The temporary daemon was stopped afterward.
 
-## Before publication
+## Distribution follow-up
 
-1. Review and merge the npm-name preparation, require its checks to pass, and inspect the final tarball and checksum. Keep the existing supported scope and documented development-only advisories in view.
-2. Decide how to tag the renamed source revision. Keep the current `v1.0.0` tag untouched until the maintainer explicitly authorizes its replacement or a different release tag/version. Then follow [the release procedure](RELEASING.md) to publish the exact checked artifact only after authorization.
-3. Verify the exact npm version in a test Paseo daemon, then update the primary installation instructions to the published package.
-4. Submit to the Paseo registry separately after published-artifact verification.
+The release and npm publication are complete. A Paseo registry submission is a separate, optional next step; it has not been submitted as part of this publication. Future versions follow [the release procedure](RELEASING.md) and require an explicit version request.
