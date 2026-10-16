@@ -1,11 +1,11 @@
 {
-  "name": "cypress-pulse",
+  "name": "paseo-cypress-pulse",
   "version": "1.0.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "cypress-pulse",
+      "name": "paseo-cypress-pulse",
       "version": "1.0.0",
       "license": "MIT",
       "dependencies": {

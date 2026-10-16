@@ -8,6 +8,7 @@ import { exec, npmCommand, packRelease, root } from "./package.mjs";
 
 const scratch = await mkdtemp(join(tmpdir(), "pulse-package-check-"));
 try {
+  const expected = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
   const artifact = await packRelease(scratch);
   const files = new Set(artifact.files.map((file) => file.path));
   for (const required of ["npm-shrinkwrap.json", "paseo-plugin.json", "index.server.ts", "index.client.tsx", "skills/cypress-pulse/SKILL.md"])
@@ -24,10 +25,15 @@ try {
   assert.ok(!(await readdir(join(gitSource, "node_modules"))).includes("cypress"));
   await npmCommand(["install", join(scratch, artifact.filename), "--prefix", scratch,
     "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false"]);
-  const installed = join(scratch, "node_modules", "cypress-pulse");
+  const installed = join(scratch, "node_modules", expected.name);
   const pkg = JSON.parse(await readFile(join(installed, "package.json"), "utf8"));
   const manifest = JSON.parse(await readFile(join(installed, "paseo-plugin.json"), "utf8"));
   const lock = JSON.parse(await readFile(join(installed, "npm-shrinkwrap.json"), "utf8"));
+  assert.equal(pkg.name, expected.name);
+  assert.equal(pkg.name, lock.name);
+  assert.equal(pkg.name, lock.packages[""].name);
+  assert.equal(manifest.id, "cypress-pulse", "npm naming must preserve the Paseo plugin ID");
+  assert.equal(pkg.bin["cypress-pulse"], "server/cli.mjs", "npm naming must preserve the helper command");
   assert.equal(pkg.version, lock.version);
   assert.equal(pkg.private, undefined);
   assert.equal(manifest.build, undefined, "npm artifact must not reinstall dependencies");
@@ -51,7 +57,7 @@ try {
   assert.equal(VERSION, pkg.version, "Package and helper versions differ");
   for (const name of ["README.md", "OVERVIEW.md"])
     assert.ok((await readFile(join(installed, name), "utf8")).includes(pkg.version), `${name} lacks current version`);
-  assert.deepEqual((await readdir(join(scratch, "node_modules"))).filter((name) => !name.startsWith("." )).sort(), ["cypress-pulse", "typescript"]);
+  assert.deepEqual((await readdir(join(scratch, "node_modules"))).filter((name) => !name.startsWith("." )).sort(), [expected.name, "typescript"].sort());
   const { extractTestSource } = await import(pathToFileURL(join(installed, "server/test-source.mjs")));
   assert.equal(extractTestSource("sample.cy.ts", "it('works', () => {});", {titlePath:["works"]}).startLine, 1);
   const help = await exec(process.execPath, [join(installed, "server/cli.mjs"), "--help"]);

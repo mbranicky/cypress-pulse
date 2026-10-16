@@ -65,7 +65,7 @@ Create the release artifact with:
 npm run pack:release
 ```
 
-It writes `work/release/cypress-pulse-VERSION.tgz`. To keep the exact tarball that
+It writes `work/release/paseo-cypress-pulse-VERSION.tgz`. To keep the exact tarball that
 passed package integration checks, use
 `npm run test:package -- --integration --output work/release` instead. This stages the npm manifest
 without changing the source checkout: Git retains the locked
@@ -77,7 +77,7 @@ integrities. Paseo supplies its host libraries; Cypress and webpack are excluded
 from production dependencies.
 
 Inspect the artifact and test the intended npm account before publishing. The
-package name is `cypress-pulse`, public, MIT, with repository ownership
+package name is `paseo-cypress-pulse`, public, MIT, with repository ownership
 `mbranicky/cypress-pulse`. Confirm publish rights and npm's current authentication
 requirements. Do not put npm tokens in source or documentation.
 
@@ -87,10 +87,10 @@ After explicit publication authorization, commit the tested revision and create 
 matching version tag and GitHub release. Publish the checked tarball:
 
 ```sh
-npm publish work/release/cypress-pulse-VERSION.tgz --access public
+npm publish work/release/paseo-cypress-pulse-VERSION.tgz --access public
 ```
 
-Install `npm:cypress-pulse@VERSION` in a test Paseo daemon, verify its contributions,
+Install `npm:paseo-cypress-pulse@VERSION` in a test Paseo daemon, verify its contributions,
 then update README's primary installation command to the published version/source.
 If verification fails, deprecate the affected npm version with a clear explanation;
 fix it in a new version rather than attempting to replace the same version.

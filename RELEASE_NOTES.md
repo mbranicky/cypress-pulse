@@ -4,7 +4,7 @@ Version history from the repository's implementation commits. These entries desc
 
 ## 1.0.0
 
-First stable release.
+First stable release. npm package: `paseo-cypress-pulse`. The Paseo plugin ID, helper command and skill remain `cypress-pulse`.
 
 - Follow Cypress end-to-end runs in Paseo’s Explorer panel and workspace header, with live passed, failed, flaky, pending and skipped outcomes grouped by spec file.
 - Filter and search tests, inspect failure details and original-line source snippets, and browse full spec source, screenshots and spec videos.
