@@ -20,7 +20,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const exec = promisify(execFile);
 test(
   "live batch outcomes precede spec completion and optional screenshot scale doubles PNG pixels",
-  { timeout: 100_000 },
+  { timeout: 180_000 },
   async () => {
     const scratch = await mkdtemp(join(tmpdir(), "pulse-live-"));
     try {
@@ -41,6 +41,7 @@ test(
       const dimensions = [];
       for (const scale of [1, 2]) {
         const state = join(scratch, `state-${scale}`);
+        let executionFinished = false;
         const execution = exec(
           process.execPath,
           [
@@ -56,7 +57,7 @@ test(
             "--browser",
             "chrome",
           ],
-          { cwd: project, timeout: 40_000, maxBuffer: 4 * 1024 * 1024 },
+          { cwd: project, timeout: 75_000, maxBuffer: 4 * 1024 * 1024 },
         ).then(
           () => ({ code: 0 }),
           (error) => ({
@@ -64,9 +65,12 @@ test(
             stdout: error.stdout,
             stderr: error.stderr,
           }),
-        );
+        ).finally(() => {
+          executionFinished = true;
+        });
         let live;
-        for (let attempt = 0; attempt < 60; attempt++) {
+        // Browser startup shares the process deadline; keep observing until exit.
+        while (!executionFinished) {
           const runs = await listBatchRuns(
             state,
             await realpath(project),
@@ -79,14 +83,18 @@ test(
             live.flaky === 1
           )
             break;
-          await new Promise((resolve) => setTimeout(resolve, 250));
+          await Promise.race([
+            execution,
+            new Promise((resolve) => setTimeout(resolve, 250)),
+          ]);
         }
         const outcome = await execution;
-        assert.equal(outcome.code, 1, `${outcome.stdout}\n${outcome.stderr}`);
+        const diagnostics = `Last live snapshot: ${JSON.stringify(live)}\n${outcome.stdout ?? ""}\n${outcome.stderr ?? ""}`;
+        assert.equal(outcome.code, 1, diagnostics);
         assert.equal(
           live?.status,
           "running",
-          "outcomes must be visible before the spec completes",
+          `outcomes must be visible before the spec completes\n${diagnostics}`,
         );
         assert.deepEqual(
           [
@@ -97,6 +105,7 @@ test(
             live.totalTests,
           ],
           [2, 1, 1, 0, 4],
+          diagnostics,
         );
         const [finished] = await listBatchRuns(state, await realpath(project));
         assert.deepEqual(
