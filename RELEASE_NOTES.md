@@ -2,7 +2,9 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
-## Unreleased
+## 1.0.1
+
+Patch release prepared for review; not yet published.
 
 - Omit saved batch runs whose project or worktree no longer exists, preserving their on-disk journals and existing retention behavior.
 - Resolve workspace and historical project paths before filtering, supporting workspace aliases and excluding symlink escapes.
