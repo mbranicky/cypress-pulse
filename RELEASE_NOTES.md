@@ -6,6 +6,8 @@ Version history from the repository's implementation commits. These entries desc
 
 Patch release prepared for review; not yet published.
 
+- Support Paseo app and daemon `>=0.11.2 <0.13.0`, including Paseo 0.12.0; retain minimum-SDK checks and add a separate 0.12 SDK typecheck in both CI Node jobs.
+
 - Omit saved batch runs whose project or worktree no longer exists, preserving their on-disk journals and existing retention behavior.
 - Resolve workspace and historical project paths before filtering, supporting workspace aliases and excluding symlink escapes.
 - Skip snapshots missing during creation or cleanup, while surfacing corrupt manifests, mismatched run identities and unexpected filesystem errors as panel notices.
