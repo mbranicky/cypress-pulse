@@ -2,12 +2,13 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
-## 1.0.1
+## 1.1.0
 
-Patch release prepared for review; not yet published.
+Release candidate prepared for review; not yet published. Includes the previously prepared, unpublished 1.0.1 changes.
 
 - Support Paseo app and daemon `>=0.11.2 <0.13.0`, including Paseo 0.12.0; retain minimum-SDK checks and add a separate 0.12 SDK typecheck in both CI Node jobs.
-
+- Run CI when PRs are opened, updated or reopened, and after main-branch pushes. Marking a draft ready for review no longer reruns unchanged code.
+- Keep observing live Cypress results through slower browser startup, with bounded process timeouts and useful failure diagnostics in the integration suite.
 - Omit saved batch runs whose project or worktree no longer exists, preserving their on-disk journals and existing retention behavior.
 - Resolve workspace and historical project paths before filtering, supporting workspace aliases and excluding symlink escapes.
 - Skip snapshots missing during creation or cleanup, while surfacing corrupt manifests, mismatched run identities and unexpected filesystem errors as panel notices.

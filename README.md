@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Current version: **1.0.1** (prepared; not yet published) · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.1.0** (prepared; not yet published) · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
@@ -24,7 +24,7 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 
 ## Get started
 
-The latest published version is **1.0.0**. Version **1.0.1** is being prepared; use the published version below until its release is announced.
+The latest published version is **1.0.0**. Version **1.1.0** is being prepared; use the published version below until its release is announced.
 
 ```sh
 paseo plugin install npm:paseo-cypress-pulse@1.0.0
