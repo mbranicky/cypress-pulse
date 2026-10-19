@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "typecheck:paseo-012": "node scripts/check-paseo-sdk.mjs",
     "test": "node --test server/*.test.mjs",
     "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",
     "check": "npm run typecheck && npm test",
