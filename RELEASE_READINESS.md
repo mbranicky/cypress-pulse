@@ -1,74 +1,87 @@
-# 1.0 release readiness
+# Release verification
 
-**paseo-cypress-pulse@1.0.0** was published to [npmjs.com](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.0.0) on 2026-10-16 after explicit maintainer authorization.
-The [GitHub release](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.0.0) uses tag `paseo-cypress-pulse-v1.0.0` at commit `10d9e18`. The obsolete `v1.0.0` tag was deleted at the maintainer’s request.
+## 1.1.0 — published 2026-10-19
 
-## Completed
+**[paseo-cypress-pulse@1.1.0](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.1.0)** is published on npmjs.com and marked `latest`.
+The [GitHub Release](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.1.0)
+uses tag `paseo-cypress-pulse-v1.1.0` at merged commit `fb1580162407ade0154b56c2dbb08f011c7c0941`.
+Its assets include the verified npm tarball and `SHA256SUMS`.
 
-- Added public npm metadata and a publishable dependency shrinkwrap. Production
-  installs contain the plugin and pinned TypeScript parser, without Cypress,
-  webpack, React Native or other development dependencies.
-- Added locked Git dependency preparation and a staged npm packaging command
-  that omits Git's redundant preparation step. Package checks verify declared
-  media, local imports, supported host imports, helper/package version agreement,
-  source extraction, and both direct and npm-linked CLI startup.
-- Extended CI to audit production dependencies and test the production artifact
-  on Node 22.18.0 and 24.x. The workflow retains every-push-to-main and manual
-  triggers. Both jobs passed in the [verification run](https://github.com/mbranicky/cypress-pulse/actions/runs/38883186206)
-  for implementation commit `9ac0219`.
-- Typechecking and all 39 regression tests pass locally. The production artifact passed
-  all seven real Cypress integrations on Node 22.18.0 and 24.16.0: CommonJS, ESM,
-  TypeScript, webpack/ts-loader, live outcomes and doubled screenshot dimensions.
-- The production-only artifact loads with status `running` in a separate Paseo
-  0.11.4 daemon. Skill installation, dashboard outcomes, retries, test source,
-  full spec source, failure screenshots and generated spec-video RPCs work.
-- A packaged helper run completed normally across an isolated plugin reload.
-  The production collector was also verified directly against a native macOS
-  Chrome open-mode session: retry-attempt logs, hook messages, source extraction,
-  fresh reruns and rejection of reports from an older run. This direct collector
-  check used Cypress's normal macOS session directory; the separate daemon's
-  temporary home does not share that discovery directory.
-- Regression coverage includes concurrent journals, interrupted processes,
-  stale interactive reports and source/media containment. A new subprocess test
-  verifies termination forwarding, child exit and interrupted-run recording.
-- The production dependency audit reports zero known vulnerabilities. The full
-  development tree reports 21 advisories (16 high, 5 moderate), involving React
-  Native tooling and ts-loader's dependency chain. These tools are excluded from
-  production installation; do not describe the entire development tree as clean.
-  Forced React Native upgrades are deferred because the host API needs matching
-  compatibility verification. Treat development tooling as trusted-input-only.
-- Documented macOS release scope, Ubuntu batch coverage, unverified platforms,
-  interactive log limits, agent-provider data disclosure and manual data cleanup.
+The unpublished 1.0.1 work and the superseded 1.2.0 candidate were incorporated
+into 1.1.0. Neither candidate was published to npm or given a release tag.
+See [release notes](RELEASE_NOTES.md#110) for the changes.
 
-## Issues fixed during preparation
+### Supported scope
 
-- Fresh production installs could not compile a direct type dependency on
-  `@getpaseo/client`. The handler now derives its API type through the supported
-  plugin host contract.
-- CLI startup silently did nothing through symlinked paths, including macOS
-  temporary-directory aliases and npm executable links. Entry detection now
-  compares the canonical file path, covered by a subprocess regression.
-- Structurally malformed telemetry could hide a valid run. Records are checked
-  before reduction; invalid records produce a notice while valid results remain
-  available. A corrupt-record regression covers this behavior.
+- Paseo app and daemon `>=0.11.2 <0.13.0`, including Paseo 0.12.0.
+- Cypress `>=16.0.0 <17.0.0` end-to-end tests.
+- Helper Node `^22.18.0 || ^24.0.0`.
+- macOS desktop verification; Ubuntu CI verifies batch operation on both Node lines.
+  Windows, Linux desktop, mobile clients and component testing remain unverified.
+- Interactive command logs require the original Chromium-family Cypress session.
+  Batch per-test command logs and arbitrary browser-console capture are unavailable.
 
-## Publication status
+### Completed checks
 
-- [Preparation PR #1](https://github.com/mbranicky/cypress-pulse/pull/1) is merged. Both main-branch jobs passed in the [verification run](https://github.com/mbranicky/cypress-pulse/actions/runs/38885222100).
-- npm authentication is confirmed as `mbranicky`. No credentials are included in the source or artifact.
-- The package, helper, dependency lock and current-version documentation now identify version 1.0.0. Historical entries keep their original versions.
-- The GitHub release and npm publication are complete. npm marks version 1.0.0 as `latest`, and its SHA-512 integrity and SHA-1 shasum match the verified tarball.
+- Client, server and shared code typechecked against the locked Paseo 0.11.2 SDK
+  and the exact Paseo 0.12.0 plugin/client/protocol SDKs.
+- All **44 regression tests** and **seven real Cypress integrations** passed,
+  including CommonJS/ESM/TypeScript configuration preservation, named webpack
+  loaders, live partial outcomes and optional doubled screenshot dimensions.
+- Both required CI jobs, Node 22.18.0 and Node 24.x, passed for the
+  [release candidate](https://github.com/mbranicky/cypress-pulse/actions/runs/39262730114)
+  and the [merged release source](https://github.com/mbranicky/cypress-pulse/actions/runs/39263340795).
+- Production-only installation, imports, declared media, source parsing,
+  executable links and package/helper/shrinkwrap version agreement were verified.
+  The package contains only the plugin and pinned TypeScript runtime dependency;
+  Cypress, webpack and host development libraries are excluded from production dependencies.
+- Repeated packing produced byte-identical tarballs. Every packaged file matched
+  the merged source, except the documented removal of Git's preparation command
+  from the npm manifest.
+- The exact 1.1.0 artifact loaded and reloaded in an isolated Paseo 0.12.0 daemon.
+  Helper doctor reported 1.1.0, and dashboard/history RPCs verified unavailable-project
+  exclusions, useful direct-access errors and retained saved journals.
+- The feature-equivalent candidate before the numbering correction passed real
+  batch collection, settings persistence, owned skill installation, reload during
+  an active helper run, test/full-file source, screenshot and video RPC checks.
+  Its packed interactive collector passed retry/hook logs, source snippets,
+  fresh reruns and stale-report rejection. Artifact comparison confirmed that only
+  version and release files changed for the numbering correction.
+- After publication, a **fresh `npm:paseo-cypress-pulse@1.1.0` installation** through
+  Paseo succeeded in an isolated 0.12.0 daemon. Activation, helper version, skill
+  installation and reload passed. Temporary test daemons and sessions were stopped.
+- The registry download's SHA-256, SHA-1 and npm integrity matched the tested
+  tarball. Production audit at publication: **zero advisories**. The development
+  tree retained **21 advisories (16 high, 5 moderate)** in React Native tooling
+  and ts-loader's dependency chain. These development tools are excluded from
+  production installation; the full development tree is not described as clean.
 
-## 1.0.0 artifact verification
+### Published artifact
 
-- Typechecking and all 39 regression tests passed locally. The renamed production package passed all seven real Cypress integrations on Node 24.16.0; CI validates the same package checks on both supported Node lines.
-- The exact retained tarball installed and reloaded with status `running` in an isolated Paseo 0.11.4 daemon. Its installed helper reports version 1.0.0. The temporary daemon was stopped after verification.
-- The production dependency audit still reports zero known vulnerabilities.
-- Local artifact: `work/release/paseo-cypress-pulse-1.0.0.tgz`; checksum and machine-readable evidence are saved alongside it. The tarball is ignored by Git; these exact bytes are published to npm and attached to the GitHub release.
-- SHA-256: `48ecbdbac7005e0f581a11bac7ff69352d6dfaf2ba96e441b4c8d2c7d10ff77b`.
-- [Main-branch CI](https://github.com/mbranicky/cypress-pulse/actions/runs/38907220363) passed on Node 22.18.0 and 24.x for the tagged source.
-- A fresh `npm:paseo-cypress-pulse@1.0.0` installation through Paseo succeeded in an isolated daemon. Plugin activation, helper doctor (version 1.0.0), skill installation and reload all passed. The temporary daemon was stopped afterward.
+- File: `paseo-cypress-pulse-1.1.0.tgz` — 3,562,865 bytes, 56 files.
+- SHA-256: `50239be269b9b94903c73aacec1227822d453780da5f4fd5d115178ced78ae1a`.
+- SHA-1: `a1b2645e6b47710c5ead84dcdf29bcbf2a75fe3b`.
+- The tarball and checksum are attached to the GitHub Release. Local verification
+  evidence is retained under `work/release-1.1.0/`, which is ignored by Git.
 
-## Distribution follow-up
+### Distribution follow-up
 
-The release and npm publication are complete. A Paseo registry submission is a separate, optional next step; it has not been submitted as part of this publication. Future versions follow [the release procedure](RELEASING.md) and require an explicit version request.
+npm publication and the GitHub Release are complete. The original
+[Paseo catalog submission #556](https://github.com/getpaseo/plugins/pull/556) was
+merged on 2026-10-16. As checked on 2026-10-19, the
+[catalog record](https://github.com/getpaseo/plugins/blob/main/plugins/mbranicky/cypress-pulse.json)
+still pins **1.0.0**; updating that separate listing to **1.1.0** remains necessary
+for catalog users to receive Paseo 0.12 support. Direct npm installation already
+provides 1.1.0.
+
+## Earlier stable release
+
+[Version 1.0.0](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.0.0)
+was published on 2026-10-16, with 39 regression tests, seven Cypress integrations
+and isolated Paseo 0.11.4 installation checks. Its historical compatibility range
+was `>=0.11.2 <0.12.0`; it does not support Paseo 0.12. The obsolete `v1.0.0` tag
+was deleted at the maintainer's request; the package-prefixed release tag remains.
+
+Future releases follow [the release procedure](RELEASING.md). Version changes and
+publication require explicit maintainer authorization; routine documentation
+updates keep the current package version.
