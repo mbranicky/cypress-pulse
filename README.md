@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Current version: **1.0.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.0.1** (prepared; not yet published) · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
@@ -23,6 +23,8 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 </details>
 
 ## Get started
+
+The latest published version is **1.0.0**. Version **1.0.1** is being prepared; use the published version below until its release is announced.
 
 ```sh
 paseo plugin install npm:paseo-cypress-pulse@1.0.0
@@ -142,11 +144,11 @@ An already running, uninstrumented batch invocation cannot be attached. Interact
 
 The panel lists 30 recent runs and up to 300 test details for the selected run, with failures and running tests first. Run and file counts cover the full execution, including tests outside the detail limit. Source previews read only specs identified by the run, inside the workspace, with a 1 MiB limit; long lines can be scrolled horizontally. Screenshot previews accept PNG/JPEG files up to 8 MiB; video previews accept MP4 files up to 32 MiB. Telemetry reads have a 32 MiB limit; exceeding it produces a notice. Interactive reports are checked against the session and run identity before and after reading.
 
-Run data is stored on the daemon host in `~/.local/state/cypress-pulse` and sent through Paseo to connected clients when viewed. Agent-invoked helper output can also enter the agent conversation and reach its configured provider. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No Cypress Cloud account is required. History is not automatically deleted; display limits do not limit disk retention. See [data retention and removal](RELEASING.md#data-retention-and-removal) for cleanup guidance.
+Run data is stored on the daemon host in `~/.local/state/cypress-pulse` and sent through Paseo to connected clients when viewed. Agent-invoked helper output can also enter the agent conversation and reach its configured provider. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No Cypress Cloud account is required. History is not automatically deleted; display limits do not limit disk retention. Runs whose original project or worktree has been removed are quietly omitted from the panel; their saved journals remain on disk. Workspace aliases are resolved before filtering, and symlink paths escaping the workspace are excluded. Incomplete snapshots during run creation or cleanup are skipped, while corrupt records, inconsistent run identities and unexpected filesystem failures produce notices. A missing selected workspace remains an error. Direct `show --run-id ID` access to a saved run whose project is unavailable reports that the project no longer exists. See [data retention and removal](RELEASING.md#data-retention-and-removal) for cleanup guidance.
 
 ## Development and verification
 
-[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, updated with new commits, or marked ready for review. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
 
 ```sh
 npm ci
