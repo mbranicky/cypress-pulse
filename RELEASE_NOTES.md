@@ -2,6 +2,14 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.1.1
+
+Documentation hotfix; plugin behavior and supported versions are unchanged from 1.1.0.
+
+- Updated the bundled README, overview, installation commands and version references for 1.1.1, including Paseo 0.12 support and saved-history improvements.
+- Corrected the release procedure so all documentation is finalized and verified before tagging and publication; later corrections require a new version.
+- Added package verification for matching package, helper, shrinkwrap, README, overview and release-note versions, including installation/update commands and the Git release reference.
+
 ## 1.1.0
 
 Published on **2026-10-19** as [paseo-cypress-pulse@1.1.0](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.1.0). [GitHub Release and assets](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.1.0). Includes the previously prepared, unpublished 1.0.1 changes.

@@ -34,7 +34,9 @@ try {
   assert.equal(pkg.name, lock.packages[""].name);
   assert.equal(manifest.id, "cypress-pulse", "npm naming must preserve the Paseo plugin ID");
   assert.equal(pkg.bin["cypress-pulse"], "server/cli.mjs", "npm naming must preserve the helper command");
+  assert.equal(pkg.version, expected.version);
   assert.equal(pkg.version, lock.version);
+  assert.equal(pkg.version, lock.packages[""].version);
   assert.equal(pkg.private, undefined);
   assert.equal(manifest.build, undefined, "npm artifact must not reinstall dependencies");
   assert.equal(pkg.repository.url, "git+https://github.com/mbranicky/cypress-pulse.git");
@@ -55,8 +57,18 @@ try {
   for (const media of manifest.media) assert.ok(files.has(media), `Missing media: ${media}`);
   const { VERSION } = await import(pathToFileURL(join(installed, "server/environment.mjs")));
   assert.equal(VERSION, pkg.version, "Package and helper versions differ");
-  for (const name of ["README.md", "OVERVIEW.md"])
-    assert.ok((await readFile(join(installed, name), "utf8")).includes(pkg.version), `${name} lacks current version`);
+  // Validate the shipped documentation, not just the working-tree metadata.
+  // Historical version mentions remain valid; current installation instructions must match.
+  const readme = await readFile(join(installed, "README.md"), "utf8");
+  assert.ok(readme.includes(`Current version: **${pkg.version}**`), "README current version differs from package");
+  assert.ok(readme.includes(`paseo plugin install npm:${pkg.name}@${pkg.version}`), "README npm install version differs from package");
+  assert.ok(readme.includes(`paseo plugin update ${manifest.id} --version ${pkg.version} --yes`), "README npm update version differs from package");
+  assert.ok(readme.includes(`--ref ${pkg.name}-v${pkg.version}`), "README Git release reference differs from package");
+  assert.doesNotMatch(readme, /prepared; not yet published|is being prepared|latest published version is/i, "README must use durable release wording before publication");
+  const overview = await readFile(join(installed, "OVERVIEW.md"), "utf8");
+  assert.ok(overview.includes(`Current version: ${pkg.version}.`), "OVERVIEW current version differs from package");
+  const notes = await readFile(join(installed, "RELEASE_NOTES.md"), "utf8");
+  assert.equal(notes.match(/^## (\d+\.\d+\.\d+)$/m)?.[1], pkg.version, "First release-note entry differs from package");
   assert.deepEqual((await readdir(join(scratch, "node_modules"))).filter((name) => !name.startsWith("." )).sort(), [expected.name, "typescript"].sort());
   const { extractTestSource } = await import(pathToFileURL(join(installed, "server/test-source.mjs")));
   assert.equal(extractTestSource("sample.cy.ts", "it('works', () => {});", {titlePath:["works"]}).startLine, 1);

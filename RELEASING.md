@@ -57,7 +57,17 @@ controls are included in this release.
 
 When the maintainer requests the version change, update `package.json`,
 `npm-shrinkwrap.json`, `server/environment.mjs`, README and OVERVIEW together, and
-add the release entry to RELEASE_NOTES. Repeat the checks above on that revision.
+add the release entry to RELEASE_NOTES. Finalize README installation/update commands
+and the Git release reference for the new version at this point. Use durable wording
+such as "Install version X" rather than publication-status labels that would require
+an edit after publishing. Keep historical release entries and verification evidence
+at their original versions. Repeat the checks above on that revision.
+
+All code and documentation must be complete before opening the release PR. Review
+and merge that PR, require both CI Node jobs to pass on the final merged revision,
+and verify that the exact tested tarball matches that revision before tagging or
+publishing. If review changes any packaged file, repeat package verification and
+replace the candidate artifact before proceeding.
 
 Create the release artifact with:
 
@@ -83,15 +93,23 @@ requirements. Do not put npm tokens in source or documentation.
 
 ## Publish and verify
 
-After explicit publication authorization, commit the tested revision and create a
-matching version tag and GitHub release. Publish the checked tarball:
+Tagging and publication are the final release steps, after all code, documentation,
+PR review, merge and verification are complete. They require explicit maintainer
+authorization. Create the matching version tag on the verified merged revision,
+then publish the exact checked tarball:
 
 ```sh
 npm publish work/release/paseo-cypress-pulse-VERSION.tgz --access public
 ```
 
-Install `npm:paseo-cypress-pulse@VERSION` in a test Paseo daemon, verify its contributions,
-then update README's primary installation command to the published version/source.
+After npm publication, install `npm:paseo-cypress-pulse@VERSION` in a test Paseo
+daemon and verify its contributions. Complete the GitHub release with the tested
+tarball and checksum. Record post-publication evidence outside the immutable
+artifact, for example in GitHub release notes and local verification records.
+Do not follow publication with documentation edits intended for the same version.
+Any subsequent code or documentation correction belongs to a new version, with
+explicit maintainer authorization; never move a release tag or try to replace a
+published npm version.
 If verification fails, deprecate the affected npm version with a clear explanation;
 fix it in a new version rather than attempting to replace the same version.
 

@@ -1,10 +1,10 @@
 # Cypress Pulse
 
-Current version: **1.1.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.1.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
-[Version 1.1.0](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.1.0), published on 2026-10-19, adds Paseo 0.12 support and improves saved history: runs for deleted projects/worktrees are omitted without deleting journals, while genuine read errors remain visible. See [release notes](RELEASE_NOTES.md#110) for the full changes.
+Version **1.1.1** corrects the documentation bundled with the npm package and adds release-documentation checks. It retains Paseo 0.12 support and the saved-history improvements from 1.1.0. See [release notes](RELEASE_NOTES.md#111) for the changes.
 
 The npm package name is **`paseo-cypress-pulse`**. Paseo’s plugin ID, the helper command, and the agent skill remain `cypress-pulse`; the GitHub repository remains `mbranicky/cypress-pulse`.
 
@@ -26,19 +26,19 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 
 ## Get started
 
-The latest published version is **1.1.0**, including support for Paseo 0.12.
+Install version **1.1.1**, including support for Paseo 0.12:
 
 ```sh
-paseo plugin install npm:paseo-cypress-pulse@1.1.0
+paseo plugin install npm:paseo-cypress-pulse@1.1.1
 ```
 
 Existing npm installations can update with:
 
 ```sh
-paseo plugin update cypress-pulse --version 1.1.0 --yes
+paseo plugin update cypress-pulse --version 1.1.1 --yes
 ```
 
-For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.1.0`.
+For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.1.1`.
 
 1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
 2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
@@ -189,4 +189,4 @@ Test source extraction uses the pinned TypeScript parser as a plugin runtime dep
 
 The npm release artifact is prepared with `npm run pack:release`. Git installations run locked production dependency preparation; npm artifacts omit that redundant step. See the [release procedure](RELEASING.md) before versioning or publishing.
 
-Published artifact checks, verification scope and distribution follow-up are recorded in the [release verification report](https://github.com/mbranicky/cypress-pulse/blob/main/RELEASE_READINESS.md).
+Artifact checks, verification scope and distribution follow-up are recorded in the [release verification report](https://github.com/mbranicky/cypress-pulse/blob/main/RELEASE_READINESS.md).

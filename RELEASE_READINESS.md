@@ -1,8 +1,57 @@
 # Release verification
 
+## 1.1.1
+
+Documentation hotfix for the README bundled in the npm artifact. No dashboard,
+collector, Cypress configuration, dependency or compatibility changes are included.
+The supported scope below remains unchanged. See [release notes](RELEASE_NOTES.md#111).
+
+Package, shrinkwrap and helper versions, README/OVERVIEW version markers, install
+and update commands, Git release reference and release notes are finalized for
+1.1.1 before tagging or publishing. Historical 1.1.0 evidence below is retained
+as historical evidence, not presented as verification of a new artifact.
+
+### Completed checks
+
+- Both Paseo SDK typechecks passed (locked 0.11.2 and exact 0.12.0).
+- All 44 regression tests passed locally on Node 22.18.0 and Node 24.16.0.
+- Production-only package installation passed all 44 installed-module regressions
+  and seven real Cypress integrations, including live partial outcomes, preserved
+  webpack loader resolution and 2× screenshot dimensions.
+- A deliberate stale README installation command was rejected by the new package
+  check. Current install/update commands, Git reference, version markers and first
+  release-note entry match 1.1.1 in the actual tarball.
+- The exact tarball loaded and reloaded in an isolated Paseo 0.12.0 daemon. Helper
+  doctor reported 1.1.1; owned skill installation, workspace history filtering,
+  direct access errors and preservation of saved journals passed. The test daemon
+  was stopped; the user's active Paseo installation was not changed.
+- Repacking produced identical bytes. The file list and screenshots match 1.1.0;
+  only the README, overview, release notes, release procedure, package/shrinkwrap
+  versions and helper version differ. No dependency versions changed.
+- Production audit: zero advisories. The unchanged development tree has 21
+  advisories (16 high, 5 moderate), as documented for 1.1.0 below.
+- Local Markdown file links resolve, and the final diff passes whitespace checks.
+
+### Verified artifact
+
+- File: `paseo-cypress-pulse-1.1.1.tgz` — 3,563,717 bytes, 56 files.
+- SHA-256: `01352650849a73c02b8174a318d5897bf4cca04b145b4853a9a71e6f34c7adb5`.
+- Exact tested artifact, checksum and verification records:
+  `work/release-1.1.1/` (ignored by Git).
+
+### Remaining distribution steps
+
+The final merged revision must pass both required Node CI jobs and match this
+artifact before tagging or publication. Tagging, npm publication and the GitHub
+release require maintainer authorization. No release tag or npm publication is
+created by release preparation. Update the separate Paseo catalog listing to
+1.1.1 after publication; the dated 1.1.0 distribution record below is historical.
+Post-publication evidence belongs in release notes on GitHub or local verification
+records, without changing the tagged source or publishing over the same version.
+
 ## 1.1.0 — published 2026-10-19
 
-**[paseo-cypress-pulse@1.1.0](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.1.0)** is published on npmjs.com and marked `latest`.
+**[paseo-cypress-pulse@1.1.0](https://www.npmjs.com/package/paseo-cypress-pulse/v/1.1.0)** was published on npmjs.com.
 The [GitHub Release](https://github.com/mbranicky/cypress-pulse/releases/tag/paseo-cypress-pulse-v1.1.0)
 uses tag `paseo-cypress-pulse-v1.1.0` at merged commit `fb1580162407ade0154b56c2dbb08f011c7c0941`.
 Its assets include the verified npm tarball and `SHA256SUMS`.
