@@ -2,6 +2,13 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## Unreleased
+
+- Omit saved batch runs whose project or worktree no longer exists, preserving their on-disk journals and existing retention behavior.
+- Resolve workspace and historical project paths before filtering, supporting workspace aliases and excluding symlink escapes.
+- Skip snapshots missing during creation or cleanup, while surfacing corrupt manifests, mismatched run identities and unexpected filesystem errors as panel notices.
+- Return a useful error when the helper is asked directly for a run whose project is unavailable; keep a missing selected workspace an explicit failure.
+
 ## 1.0.0
 
 First stable release. npm package: `paseo-cypress-pulse`. The Paseo plugin ID, helper command and skill remain `cypress-pulse`.

@@ -32,12 +32,13 @@ export async function collect(directory: string) {
   if (cached && Date.now() - cached.at < 1500) return cached;
   if (inflight.has(directory)) return inflight.get(directory)!;
   const promise = (async () => {
-    const batch = await listBatchRuns(undefined, directory);
+    const notices: string[] = [];
+    const batch = await listBatchRuns(undefined, directory, (notice: string) => notices.push(notice));
     const interactive = await tap.collect(
       directory,
       batch[0]?.projectRoot || directory,
     );
-    const notices = interactive.notice ? [interactive.notice] : [];
+    if (interactive.notice) notices.push(interactive.notice);
     const runs: PulseRun[] = [];
     for (const value of [...batch, ...interactive.runs]) {
       const parsed = runSchema.safeParse(value);

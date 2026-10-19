@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { reduceRun, inside, listBatchRuns, readBatchRun } from "./store.mjs";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, rm, symlink, readFile, chmod } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 const manifest = {
@@ -153,6 +153,10 @@ test("workspace containment rejects siblings and traversal", () => {
 test("concurrent run journals remain independent and a forged workspace root is rejected", async () => {
   const state = await mkdtemp(join(tmpdir(), "pulse-store-"));
   try {
+    const project = join(state, "project");
+    const outside = join(state, "outside");
+    await mkdir(project);
+    await mkdir(outside);
     await Promise.all(
       ["one", "two", "outside"].map(async (id, index) => {
         const directory = join(state, "runs", id);
@@ -162,7 +166,7 @@ test("concurrent run journals remain independent and a forged workspace root is 
           JSON.stringify({
             ...manifest,
             id,
-            projectRoot: id === "outside" ? "/outside" : "/project",
+            projectRoot: id === "outside" ? outside : project,
             ownerPid: process.pid,
           }),
         );
@@ -182,7 +186,7 @@ test("concurrent run journals remain independent and a forged workspace root is 
         );
       }),
     );
-    const runs = await listBatchRuns(state, "/project");
+    const runs = await listBatchRuns(state, project);
     assert.equal(runs.length, 2);
     assert.deepEqual(
       new Set(runs.map((run) => run.id)),
@@ -197,7 +201,7 @@ test("concurrent run journals remain independent and a forged workspace root is 
 test("corrupt and structurally invalid records do not hide a valid run", async () => {
   const directory = await mkdtemp(join(tmpdir(), "pulse-corrupt-"));
   try {
-    await writeFile(join(directory, "manifest.json"), JSON.stringify(manifest));
+    await writeFile(join(directory, "manifest.json"), JSON.stringify({...manifest, id:directory.split("/").at(-1), projectRoot: directory}));
     await writeFile(join(directory, "events-1.jsonl"), [
       JSON.stringify(record("run.begin", {specs:["a.cy.js"]})),
       "{broken}",
@@ -213,5 +217,95 @@ test("corrupt and structurally invalid records do not hide a valid run", async (
     assert.ok(run.errors.some((message) => /telemetry record/i.test(message)));
   } finally {
     await rm(directory, {recursive:true, force:true});
+  }
+});
+
+async function historyFixture(t) {
+  const root = await mkdtemp(join(tmpdir(), "pulse-history-"));
+  t.after(() => rm(root, {recursive:true, force:true}));
+  const workspace = join(root, "workspace");
+  await mkdir(workspace);
+  const save = async (id, projectRoot = workspace) => {
+    const directory = join(root, "runs", id);
+    await mkdir(directory, {recursive:true});
+    await writeFile(join(directory, "manifest.json"), JSON.stringify({...manifest, id, projectRoot}));
+    await writeFile(join(directory, "exit.json"), JSON.stringify({code:0, endedAt:manifest.startedAt}));
+    return directory;
+  };
+  await save("valid");
+  return {root, workspace, save};
+}
+test("history omits removed projects and worktrees without deleting saved journals", async (t) => {
+  const f = await historyFixture(t);
+  const nested = join(f.workspace, "package");
+  const worktree = join(f.root, "worktree");
+  await mkdir(nested); await mkdir(join(worktree, "package"), {recursive:true});
+  const saved = await f.save("removed", nested);
+  await f.save("worktree", join(worktree, "package"));
+  await rm(nested, {recursive:true}); await rm(worktree, {recursive:true});
+  const notices = [];
+  assert.deepEqual((await listBatchRuns(f.root, f.workspace, n=>notices.push(n))).map(r=>r.id), ["valid"]);
+  assert.deepEqual(notices, []);
+  assert.equal(JSON.parse(await readFile(join(saved, "manifest.json"), "utf8")).id, "removed");
+  await assert.rejects(readBatchRun(saved, f.workspace, "removed"), {code:"RUN_PROJECT_MISSING"});
+});
+test("history omits project directories replaced by files and incomplete snapshots", async (t) => {
+  const f = await historyFixture(t);
+  const parent = join(f.workspace, "parent");
+  await mkdir(join(parent, "package"), {recursive:true});
+  const saved = await f.save("replaced", join(parent, "package"));
+  await rm(parent, {recursive:true}); await writeFile(parent, "file");
+  await mkdir(join(f.root, "runs", "creating"));
+  const vanished = await f.save("vanished");
+  await symlink(join(f.root, "missing-events"), join(vanished, "events-1.jsonl"));
+  const notices = [];
+  assert.deepEqual((await listBatchRuns(f.root, f.workspace, n=>notices.push(n))).map(r=>r.id), ["valid"]);
+  assert.deepEqual(notices, []);
+  await assert.rejects(readBatchRun(saved), {code:"RUN_PROJECT_MISSING"});
+});
+test("history reports corruption, identity mismatches and unexpected filesystem errors", async (t) => {
+  const f = await historyFixture(t);
+  const corrupt = await f.save("corrupt");
+  await writeFile(join(corrupt, "manifest.json"), "{broken");
+  const mismatch = await f.save("mismatch");
+  await writeFile(join(mismatch, "manifest.json"), JSON.stringify({...manifest, projectRoot:f.workspace}));
+  const loop = join(f.root, "loop"); await symlink(loop, loop);
+  await f.save("loop", loop);
+  const badExit = await f.save("bad-exit"); await writeFile(join(badExit, "exit.json"), "{broken");
+  const notices = [];
+  assert.deepEqual((await listBatchRuns(f.root, f.workspace, n=>notices.push(n))).map(r=>r.id), ["valid"]);
+  assert.equal(notices.length, 4);
+  assert.ok(notices.some(n=>/identity/.test(n)));
+  assert.ok(notices.some(n=>/ELOOP/.test(n)));
+  await assert.rejects(readBatchRun(corrupt), SyntaxError);
+  await assert.rejects(listBatchRuns(loop, f.workspace), {code:"ELOOP"});
+});
+test("history follows workspace aliases, rejects symlink escapes and validates selected workspace", async (t) => {
+  const f = await historyFixture(t);
+  const alias = join(f.root, "alias"); await symlink(f.workspace, alias, "dir");
+  const outside = join(f.root, "outside"); await mkdir(outside);
+  const escape = join(f.workspace, "escape"); await symlink(outside, escape, "dir");
+  const saved = await f.save("escape", escape);
+  const notices = [];
+  assert.deepEqual((await listBatchRuns(f.root, alias, n=>notices.push(n))).map(r=>r.id), ["valid"]);
+  assert.deepEqual(notices, []);
+  await assert.rejects(readBatchRun(saved, f.workspace, "escape"), {code:"RUN_WORKSPACE_MISMATCH"});
+  await assert.rejects(listBatchRuns(f.root, join(f.root, "missing")), {code:"ENOENT"});
+});
+
+test("history reports permission failures instead of treating them as removed projects", async (t) => {
+  if (process.platform === "win32" || process.getuid?.() === 0) return t.skip("POSIX permissions require a non-root user");
+  const f = await historyFixture(t);
+  const saved = await f.save("unreadable");
+  const file = join(saved, "manifest.json");
+  await chmod(file, 0);
+  try {
+    const notices = [];
+    assert.deepEqual((await listBatchRuns(f.root, f.workspace, n=>notices.push(n))).map(r=>r.id), ["valid"]);
+    assert.equal(notices.length, 1);
+    assert.match(notices[0], /EACCES/);
+    await assert.rejects(readBatchRun(saved), {code:"EACCES"});
+  } finally {
+    await chmod(file, 0o600);
   }
 });

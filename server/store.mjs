@@ -1,5 +1,5 @@
-import { readFile, readdir, stat } from "node:fs/promises";
-import { join, relative, isAbsolute } from "node:path";
+import { readFile, readdir, stat, realpath } from "node:fs/promises";
+import { join, relative, isAbsolute, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { stateRoot } from "./environment.mjs";
@@ -44,11 +44,35 @@ export function inside(root, path) {
       !delta.startsWith("..\\"))
   );
 }
-async function json(file) {
+async function json(file, optional = false) {
   try {
+    if ((await stat(file)).size > MAX_FILE_BYTES)
+      throw new Error("Stored data exceeds the read limit.");
     return JSON.parse(await readFile(file, "utf8"));
-  } catch {
-    return null;
+  } catch (error) {
+    if (optional && error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+async function workspacePath(workspace) {
+  if (!workspace) return undefined;
+  const path = await realpath(workspace);
+  if (!(await stat(path)).isDirectory())
+    throw Object.assign(new Error("The selected workspace is not a directory."), { code: "ENOTDIR" });
+  return path;
+}
+async function projectDirectory(project) {
+  try {
+    const path = await realpath(project);
+    if (!(await stat(path)).isDirectory())
+      throw Object.assign(new Error("Not a directory."), {code:"ENOTDIR"});
+    return path;
+  } catch (error) {
+    if (["ENOENT", "ENOTDIR"].includes(error.code))
+      throw Object.assign(new Error("The project for this saved run no longer exists."), {
+        code: "RUN_PROJECT_MISSING",
+      });
+    throw error;
   }
 }
 export async function processMatches(pid, startedAt) {
@@ -240,15 +264,25 @@ export function reduceRun(manifest, records, exit, alive = true) {
       if (test.status === "running") test.status = "interrupted";
   return run;
 }
-export async function readBatchRun(directory) {
+export async function readBatchRun(directory, workspaceDirectory, expectedId = basename(directory)) {
+  const workspace = await workspacePath(workspaceDirectory);
   const manifest = await json(join(directory, "manifest.json"));
   if (
     !manifest ||
     manifest.v !== 1 ||
     typeof manifest.id !== "string" ||
-    typeof manifest.projectRoot !== "string"
+    typeof manifest.projectRoot !== "string" ||
+    typeof manifest.startedAt !== "string" ||
+    !Number.isFinite(Date.parse(manifest.startedAt))
   )
-    return null;
+    throw new Error("Invalid saved run manifest.");
+  if (manifest.id !== expectedId)
+    throw new Error("Stored run identity does not match its history directory.");
+  const project = await projectDirectory(manifest.projectRoot);
+  if (workspace && !inside(workspace, project))
+    throw Object.assign(new Error("This run does not belong to the selected workspace."), {
+      code: "RUN_WORKSPACE_MISMATCH",
+    });
   const records = [];
   const warnings = [];
   for (const name of (await readdir(directory)).filter((name) =>
@@ -277,7 +311,7 @@ export async function readBatchRun(directory) {
     (a, b) =>
       a.at.localeCompare(b.at) || a.producer - b.producer || a.seq - b.seq,
   );
-  const exit = await json(join(directory, "exit.json"));
+  const exit = await json(join(directory, "exit.json"), true);
   const alive = exit
     ? false
     : await processMatches(manifest.ownerPid, manifest.startedAt);
@@ -285,29 +319,40 @@ export async function readBatchRun(directory) {
   run.errors.push(...new Set(warnings));
   return run;
 }
-export async function listBatchRuns(root = stateRoot(), workspaceDirectory) {
+export async function listBatchRuns(root = stateRoot(), workspaceDirectory, onNotice = (_notice) => {}) {
+  // Resolve the selected workspace before scanning: its absence is not stale history.
+  const workspace = await workspacePath(workspaceDirectory);
   const folder = join(root, "runs");
-  const entries = await readdir(folder).catch(() => []);
-  const directories = await Promise.all(
-    entries
-      .filter((name) => /^[a-zA-Z0-9-]+$/.test(name))
-      .map(async (name) => ({
-        name,
-        time: (await stat(join(folder, name)).catch(() => ({ mtimeMs: 0 })))
-          .mtimeMs,
-      })),
-  );
+  let entries;
+  try {
+    entries = await readdir(folder);
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
+  const notice = (id, error) => onNotice(`Could not read run ${id}: ${error.message}`);
+  const directories = (await Promise.all(
+    entries.filter((name) => /^[a-zA-Z0-9-]+$/.test(name)).map(async (name) => {
+      try {
+        const info = await stat(join(folder, name));
+        return {name, time:info.mtimeMs};
+      } catch (error) {
+        if (error.code !== "ENOENT") notice(name, error);
+        return null;
+      }
+    }),
+  )).filter(Boolean);
   const runs = await Promise.all(
-    directories
-      .sort((a, b) => b.time - a.time)
-      .slice(0, 100)
-      .map((entry) => readBatchRun(join(folder, entry.name)).catch(() => null)),
+    directories.sort((a, b) => b.time - a.time).slice(0, 100).map(async (entry) => {
+      try {
+        return await readBatchRun(join(folder, entry.name), workspace);
+      } catch (error) {
+        // Creation/cleanup can remove snapshots; deleted projects keep their journals.
+        if (!["ENOENT", "RUN_PROJECT_MISSING", "RUN_WORKSPACE_MISMATCH"].includes(error.code))
+          notice(entry.name, error);
+        return null;
+      }
+    }),
   );
-  return runs
-    .filter(
-      (run) =>
-        run &&
-        (!workspaceDirectory || inside(workspaceDirectory, run.projectRoot)),
-    )
-    .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  return runs.filter(Boolean).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
 }
