@@ -2,7 +2,7 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
-## 1.2.0
+## 1.1.0
 
 Release candidate prepared for review; not yet published. Includes the previously prepared, unpublished 1.0.1 changes.
 
