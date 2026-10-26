@@ -1,5 +1,64 @@
 # Release verification
 
+## 1.2.0
+
+Paseo 0.13 compatibility release. The supported app and daemon range is
+`>=0.11.2 <0.14.0`; Cypress 16 end-to-end and helper Node 22.18+/24 requirements
+remain unchanged. The locked minimum SDK stays at 0.11.2. Historical verification
+records below describe their original versions.
+
+### Compatibility and source checks
+
+- The released 1.1.1 artifact was rejected by an isolated Paseo 0.13.0 daemon
+  because its manifest required `<0.13.0`.
+- The unchanged client/server/shared implementation typechecked against exact
+  Paseo 0.13.0. Widening only the manifest in a temporary copy allowed activation,
+  reload, helper installation and dashboard RPCs on 0.13.0.
+- The final source typechecks against locked Paseo 0.11.2, exact 0.12.0 and exact
+  0.13.0. Both required CI Node jobs include the two isolated SDK checks.
+- All 44 regression tests passed locally on Node 22.18.0 and Node 24.16.0.
+- A clean production-only package passed installed-module regressions, CLI,
+  source parsing and synchronized release-documentation checks.
+- Production audit: zero advisories. The unchanged development dependency tree
+  currently reports one moderate advisory in transitive `fast-uri`, used by
+  development tooling and excluded from the production artifact.
+
+### Final package and live verification
+
+- The exact production package passed all 44 installed-module regressions and
+  seven real Cypress integrations on Node 22.18.0 and Node 24.16.0. The tarballs
+  are byte-identical. All 56 packaged files match the finalized source (with the
+  documented removal of Git-only dependency preparation from the npm manifest).
+- Integration checks preserved CJS, ESM and TypeScript project sources, hooks,
+  tasks and reporters, including named webpack loader resolution. Live partial
+  results and retries passed; optional 2× screenshots increased failure PNGs
+  from 1280×633 to 2560×1266.
+- The exact tarball loaded/reloaded in isolated Paseo 0.13.0. Helper doctor
+  reported 1.2.0. Skill installation, settings persistence, batch collection,
+  reload during an active helper, source snippets/full source, screenshot/video
+  RPC previews, interactive retry/hook command logs and fresh rerun identities
+  passed. The private daemon and test browser were stopped afterwards.
+- The installed Paseo 0.13 desktop rendered the Explorer panel with saved runs,
+  grouped specs, filters, search, failure details and button icons. Its capture
+  settings screen was accessible. The user's original disabled plugin state was
+  restored; existing project sources and settings were preserved.
+- Package verification rejected a deliberately stale Paseo range in the bundled
+  skill. Local Markdown links resolve and the diff passes whitespace checks.
+- Artifact: `paseo-cypress-pulse-1.2.0.tgz`, 3,563,947 bytes, 56 files.
+- SHA-256: `dc8ce42a6dc3fe96da4c37be59bb15594eb87296638067378f2a887601021c71`.
+- Exact package, checksum, publication preview and live verification records are
+  under `work/release-1.2.0/` (ignored by Git).
+
+### Distribution sequence
+
+Finalize all local verification and the exact package before opening the PR.
+After review and merge, require both Node jobs on `main` and verify the merged
+source matches the candidate before creating `paseo-cypress-pulse-v1.2.0`.
+The GitHub release and npm publication must use the tested package and checksum.
+Prepare npm publication without executing it until the maintainer authorizes it.
+Post-publication verification belongs in GitHub release notes/local records;
+corrections to the package require a new version.
+
 ## 1.1.1
 
 Documentation hotfix for the README bundled in the npm artifact. No dashboard,

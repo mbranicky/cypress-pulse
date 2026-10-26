@@ -3,7 +3,7 @@ import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve, extname } from "node:path";
 
-export const VERSION = "1.1.1";
+export const VERSION = "1.2.0";
 export const CYPRESS_RANGE = ">=16.0.0 <17.0.0";
 export function checkNode(version = process.versions.node) {
   const [major, minor] = version.split(".").map(Number);

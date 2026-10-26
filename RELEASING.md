@@ -6,7 +6,7 @@ verifying a release does not publish it. npm publication is a separate action.
 ## Release scope
 
 The current source targets Cypress end-to-end tests on macOS desktop with
-Paseo app and daemon `>=0.11.2 <0.13.0`, Cypress `>=16.0.0 <17.0.0`, and helper
+Paseo app and daemon `>=0.11.2 <0.14.0`, Cypress `>=16.0.0 <17.0.0`, and helper
 Node `^22.18.0 || ^24.0.0`. Ubuntu CI verifies the batch helper and filesystem
 logic on both supported Node lines. Linux desktop, Windows, mobile clients and
 component testing remain unverified. Do not describe CI coverage as desktop
@@ -25,6 +25,8 @@ controls are included in this release.
    ```sh
    npm ci
    npm run check
+   npm run typecheck:paseo-012
+   npm run typecheck:paseo-013
    npm run test:package -- --integration --output work/release
    npm audit --omit=dev
    ```

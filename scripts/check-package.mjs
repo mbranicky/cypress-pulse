@@ -67,6 +67,10 @@ try {
   assert.doesNotMatch(readme, /prepared; not yet published|is being prepared|latest published version is/i, "README must use durable release wording before publication");
   const overview = await readFile(join(installed, "OVERVIEW.md"), "utf8");
   assert.ok(overview.includes(`Current version: ${pkg.version}.`), "OVERVIEW current version differs from package");
+  const skill = await readFile(join(installed, "skills/cypress-pulse/SKILL.md"), "utf8");
+  for (const [name, text] of [["README", readme], ["OVERVIEW", overview], ["skill", skill]]) {
+    assert.ok(text.includes(`\`${manifest.requirements.paseo}\``), `${name} Paseo range differs from manifest`);
+  }
   const notes = await readFile(join(installed, "RELEASE_NOTES.md"), "utf8");
   assert.equal(notes.match(/^## (\d+\.\d+\.\d+)$/m)?.[1], pkg.version, "First release-note entry differs from package");
   assert.deepEqual((await readdir(join(scratch, "node_modules"))).filter((name) => !name.startsWith("." )).sort(), [expected.name, "typescript"].sort());
