@@ -6,6 +6,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+from shlex import quote
 import subprocess
 import tarfile
 import tempfile
@@ -38,7 +39,8 @@ class ReleaseGates(unittest.TestCase):
             "repository": {"url": f"git+https://github.com/{release.REPOSITORY}.git"},
             "publishConfig": {"access": "public", "registry": release.REGISTRY + "/"},
             "files": ["paseo-plugin.json", "npm-shrinkwrap.json", "README.md", "server/"],
-            "scripts": {"prepare": "node -e \"require('fs').writeFileSync('executed', 'unsafe')\""},
+            "scripts": {"prepare": "node -e " + quote(
+                f"require('fs').writeFileSync({json.dumps(str(cls.repo / 'executed'))}, 'unsafe')")},
         }
         for name, data in {
             "package.json": json.dumps(package),
