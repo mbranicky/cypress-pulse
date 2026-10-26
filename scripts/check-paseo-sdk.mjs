@@ -2,7 +2,10 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { exec, npmCommand, root } from "./package.mjs";
 
-const version = "0.12.0";
+const version = process.argv[2] || "0.12.0";
+if (!["0.12.0", "0.13.0"].includes(version)) {
+  throw new Error("Choose a verified SDK target: 0.12.0 or 0.13.0.");
+}
 // Keep dependencies beneath the checkout so host peers (React, Zod, etc.)
 // resolve from the locked development tree, without replacing its minimum SDK.
 const work = join(root, "work");

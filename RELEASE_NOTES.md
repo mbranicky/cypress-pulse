@@ -2,6 +2,15 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.2.0
+
+Paseo 0.13 compatibility release.
+
+- Extended the supported Paseo app and daemon range to `>=0.11.2 <0.14.0`; 0.11.2 and 0.12 remain supported.
+- Added an exact Paseo 0.13.0 SDK typecheck to both required Node CI jobs, alongside the minimum 0.11.2 and exact 0.12.0 checks.
+- Reused the existing workspace panel, header indicator, settings and RPC APIs; no dashboard or Cypress collection changes were needed.
+- Updated installation commands, package/helper versions and compatibility documentation together before tagging or publication. Package checks now require the README, overview and bundled skill to match the manifest’s Paseo range.
+
 ## 1.1.1
 
 Documentation hotfix; plugin behavior and supported versions are unchanged from 1.1.0.

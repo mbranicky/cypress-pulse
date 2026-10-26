@@ -1,10 +1,10 @@
 # Cypress Pulse
 
-Current version: **1.1.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.2.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
-Version **1.1.1** corrects the documentation bundled with the npm package and adds release-documentation checks. It retains Paseo 0.12 support and the saved-history improvements from 1.1.0. See [release notes](RELEASE_NOTES.md#111) for the changes.
+Version **1.2.0** adds Paseo 0.13 support while retaining compatibility with Paseo 0.11.2 and 0.12. The dashboard and Cypress collection behavior are unchanged. See [release notes](RELEASE_NOTES.md#120) for the changes.
 
 The npm package name is **`paseo-cypress-pulse`**. Paseo’s plugin ID, the helper command, and the agent skill remain `cypress-pulse`; the GitHub repository remains `mbranicky/cypress-pulse`.
 
@@ -26,19 +26,19 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 
 ## Get started
 
-Install version **1.1.1**, including support for Paseo 0.12:
+Install version **1.2.0**, including support for Paseo 0.13:
 
 ```sh
-paseo plugin install npm:paseo-cypress-pulse@1.1.1
+paseo plugin install npm:paseo-cypress-pulse@1.2.0
 ```
 
 Existing npm installations can update with:
 
 ```sh
-paseo plugin update cypress-pulse --version 1.1.1 --yes
+paseo plugin update cypress-pulse --version 1.2.0 --yes
 ```
 
-For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.1.1`.
+For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.2.0`.
 
 1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
 2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
@@ -54,7 +54,7 @@ The installer runs only when clicked. Existing files or links owned by another i
 
 | Component            | Supported versions      |
 | -------------------- | ----------------------- |
-| Paseo app and daemon | `>=0.11.2 <0.13.0`      |
+| Paseo app and daemon | `>=0.11.2 <0.14.0`      |
 | Project Cypress      | `>=16.0.0 <17.0.0`      |
 | Helper Node.js       | `^22.18.0` or `^24.0.0` |
 
@@ -156,7 +156,7 @@ Run data is stored on the daemon host in `~/.local/state/cypress-pulse` and sent
 
 ## Development and verification
 
-[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0 SDK, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012` locally for the same isolated check. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0 and 0.13.0 SDKs, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012` and `npm run typecheck:paseo-013` locally for the same isolated checks. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
 
 ```sh
 npm ci
@@ -171,7 +171,8 @@ After changes, typecheck and run `paseo plugin reload cypress-pulse`.
 
 Unit tests cover reporting, retries, empty runs, interruption, runtime gates, session targeting, report freshness, skill installation with ownership protection, file grouping, and source-preview boundaries. Integration tests run real Cypress against isolated CommonJS, ESM, and TypeScript configurations, checking asynchronous hooks, tasks, reporter preservation, and unchanged source checksums. The live regression observes passed, failed, and flaky outcomes before spec completion, then checks that optional 2× capture doubles failure PNG dimensions. Additional regression tests compare native and monitored runs with `@cypress/webpack-preprocessor`, named `ts-loader`, TypeScript support files, and aliases. They cover both a root CommonJS config and a nested ESM TypeScript config, including relative reads during config import, tasks, and later hooks.
 
-Published 1.1.0 verification: both Paseo SDK typechecks, all 44 regressions and seven Cypress integrations passed, including both required Node CI jobs. The registry tarball matched the tested artifact, and a fresh npm installation in isolated Paseo 0.12.0 passed activation, helper version, skill installation and reload checks. The [release verification report](https://github.com/mbranicky/cypress-pulse/blob/main/RELEASE_READINESS.md) records the artifact checksums, live feature checks and remaining catalog update.
+Release verification includes SDK checks for every supported Paseo line, 44 regression tests, seven real Cypress integrations, clean production-package installation and isolated Paseo runtime checks. The [release verification report](https://github.com/mbranicky/cypress-pulse/blob/main/RELEASE_READINESS.md) records evidence for each version, artifact checksums and distribution steps. Ubuntu CI covers both supported Node lines; macOS desktop checks exercise Paseo integration.
+
 
 Previously verified with Paseo 0.11.2 on macOS, Cypress 16.1.1, and Cypress 16.0.0 for the minimum-version batch path. Live interactive Electron sessions, reruns, failure messages, batch screenshot previews, one-click skill installation, grouped file sections, source previews, narrow Explorer layouts, and Ghostty/Light themes were checked in the desktop app. Compatibility checks used Node 22.18.0 and 24.16.0. The webpack regression cases also passed on Cypress 16.0.0 with Node 22.18.0 in headed Chrome. Chrome open-mode partial results were also verified on Cypress 16.0.0 with Node 22.18.0. Live partial results, live failure reports, spinners, card interactions, wide source dialogs, original-pixel image zoom, and a 320 px Explorer panel were verified in Paseo for 0.4.0.
 
