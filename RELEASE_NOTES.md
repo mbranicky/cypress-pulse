@@ -2,6 +2,15 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.2.1
+
+Manual npm publishing from GitHub Actions; plugin behavior and supported versions are unchanged.
+
+- Added **Publish to npm**, a manually triggered workflow with `dry-run`, `publish` and `verify` modes, using npm trusted publishing without a stored npm token.
+- Required a published GitHub Release, a tag merged into main, both green Node checks for the tagged commit, matching release checksums and package contents identical to tagged source.
+- Added duplicate-version and `latest` downgrade protection, post-publication integrity checks, and tests for publication gates in both CI Node jobs.
+- Documented the one-time GitHub environment and npm trusted-publisher setup, and synchronized package/helper versions and installation references for 1.2.1.
+
 ## 1.2.0
 
 Paseo 0.13 compatibility release.

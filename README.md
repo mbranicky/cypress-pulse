@@ -1,10 +1,10 @@
 # Cypress Pulse
 
-Current version: **1.2.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.2.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
 
-Version **1.2.0** adds Paseo 0.13 support while retaining compatibility with Paseo 0.11.2 and 0.12. The dashboard and Cypress collection behavior are unchanged. See [release notes](RELEASE_NOTES.md#120) for the changes.
+Version **1.2.1** adds a manually triggered GitHub Actions workflow for publishing verified release packages to npm. It retains Paseo 0.13 support and leaves dashboard and Cypress collection behavior unchanged. See [release notes](RELEASE_NOTES.md#121) for the changes.
 
 The npm package name is **`paseo-cypress-pulse`**. Paseo’s plugin ID, the helper command, and the agent skill remain `cypress-pulse`; the GitHub repository remains `mbranicky/cypress-pulse`.
 
@@ -26,19 +26,19 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 
 ## Get started
 
-Install version **1.2.0**, including support for Paseo 0.13:
+Install version **1.2.1**, including support for Paseo 0.13:
 
 ```sh
-paseo plugin install npm:paseo-cypress-pulse@1.2.0
+paseo plugin install npm:paseo-cypress-pulse@1.2.1
 ```
 
 Existing npm installations can update with:
 
 ```sh
-paseo plugin update cypress-pulse --version 1.2.0 --yes
+paseo plugin update cypress-pulse --version 1.2.1 --yes
 ```
 
-For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.2.0`.
+For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.2.1`.
 
 1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
 2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
@@ -154,18 +154,30 @@ The panel lists 30 recent runs and up to 300 test details for the selected run, 
 
 Run data is stored on the daemon host in `~/.local/state/cypress-pulse` and sent through Paseo to connected clients when viewed. Agent-invoked helper output can also enter the agent conversation and reach its configured provider. `CYPRESS_PULSE_STATE_DIR` or helper `--state-dir` can override it; the daemon and helper must use the same location. It includes saved capture defaults, test titles, failure text, and artifact paths, without copying project configuration or environment variables. The helper’s `show --run-id ID` command returns normalized JSON for agents. No Cypress Cloud account is required. History is not automatically deleted; display limits do not limit disk retention. Runs whose original project or worktree has been removed are quietly omitted from the panel; their saved journals remain on disk. Workspace aliases are resolved before filtering, and symlink paths escaping the workspace are excluded. Incomplete snapshots during run creation or cleanup are skipped, while corrupt records, inconsistent run identities and unexpected filesystem failures produce notices. A missing selected workspace remains an error. Direct `show --run-id ID` access to a saved run whose project is unavailable reports that the project no longer exists. See [data retention and removal](RELEASING.md#data-retention-and-removal) for cleanup guidance.
 
+## Publishing from GitHub
+
+Maintainers can use **Actions → Publish to npm → Run workflow** on `main` to select
+a published GitHub Release version. The default `dry-run` mode verifies the release
+and previews npm publication; `publish` publishes its exact attached package using
+npm trusted publishing. `verify` checks an already accepted publication without
+publishing again. This workflow does not run on pushes, PRs, tags or release events.
+
+One-time setup is required on GitHub and npmjs.com. See the
+[manual publishing setup and instructions](RELEASING.md#manual-github-actions-publication).
+
 ## Development and verification
 
-[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0 and 0.13.0 SDKs, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012` and `npm run typecheck:paseo-013` locally for the same isolated checks. The workflow also supports manual runs. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0 and 0.13.0 SDKs, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012` and `npm run typecheck:paseo-013` locally for the same isolated checks. The test workflow also supports manual runs and tests the npm publication gates. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
 
 ```sh
 npm ci
 npm run check
+npm run test:publishing
 npm run test:package -- --integration
 paseo plugin install /absolute/path/to/cypress-pulse
 ```
 
-The integration suite requires installed Chrome for live-progress and screenshot-resolution verification.
+The integration suite requires installed Chrome for live-progress and screenshot-resolution verification. Publication-gate tests use Python 3's standard library, Git and npm; they do not publish packages.
 
 After changes, typecheck and run `paseo plugin reload cypress-pulse`.
 

@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 *.tgz
 coverage/
+__pycache__/
 work/
 cypress/screenshots/
 cypress/videos/
