@@ -1,6 +1,6 @@
 {
   "name": "paseo-cypress-pulse",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
   "type": "module",
@@ -32,6 +32,7 @@
     "typecheck:paseo-012": "node scripts/check-paseo-sdk.mjs",
     "typecheck:paseo-013": "node scripts/check-paseo-sdk.mjs 0.13.0",
     "test": "node --test server/*.test.mjs",
+    "test:publishing": "python3 -m unittest discover -s scripts -p 'test_*.py'",
     "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",
     "check": "npm run typecheck && npm test",
     "pack:release": "node scripts/package.mjs",

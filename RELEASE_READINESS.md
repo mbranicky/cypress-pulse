@@ -1,5 +1,55 @@
 # Release verification
 
+## 1.2.1
+
+Release-infrastructure update: a manual **Publish to npm** workflow, with version
+and installation references synchronized for 1.2.1. Dashboard behavior, collector
+behavior, production dependencies and supported Paseo/Cypress/Node ranges are
+unchanged from 1.2.0.
+
+### Completed local checks
+
+- Both workflows passed actionlint 1.7.12 syntax/expression validation.
+- All 14 publication-gate tests passed on Node 22.18.0 and Node 24.16.0. Tests cover
+  modified/missing/extra package files, unsafe archives, version/input validation,
+  failed or incomplete main checks, unpublished releases, duplicate npm versions,
+  latest downgrades, registry integrity and accepted-but-not-visible publications.
+- Reproduced npm 10.9.3 executing a prepare script despite the ignore-scripts
+  dry-run flag. The verifier now rejects npm below 11.5.1 before reading release
+  source; both CI Node jobs use isolated npm 11.5.1 for these tests.
+- Read-only preflight passed against the real published 1.2.0 GitHub Release,
+  checking its main build, tag, source contents, release assets and checksum.
+- Post-publication verification passed against the existing npm 1.1.1 package:
+  metadata, SHA-1/SHA-512 integrity and byte-identical downloaded tarball. No new
+  npm version was published by these checks.
+- All 44 plugin regressions and the minimum-SDK check passed on both Node lines.
+  Exact Paseo 0.12.0 and 0.13.0 SDK checks also passed.
+- Production-only packages passed all 44 installed-module regressions and seven
+  real Cypress integrations on both Node lines. The resulting tarballs are
+  byte-identical and match all 56 packaged source files, accounting for the
+  documented npm-manifest transformation.
+- The exact 1.2.1 tarball loaded and reloaded in isolated Paseo 0.13.0; helper
+  doctor reported 1.2.1. Owned skill setup, dashboard/history filtering and useful
+  missing-project errors passed. The private daemon was stopped; the user's
+  active plugin was not changed.
+- GitHub environment `npm` was configured with a single allowed deployment branch,
+  `main`, and verified through the API. No secrets were added.
+- Local Markdown links and whitespace checks passed.
+
+### Artifact and remaining gates
+
+- Package: `paseo-cypress-pulse-1.2.1.tgz`, 3,566,410 bytes, 56 files.
+- SHA-256: `fa233fc7898d66975f1cf04e927aae544eda26e67b26d3f1fdf353917ca724b1`.
+- Verified package, checksum and local evidence: `work/release-1.2.1/`.
+
+PR review, merge and both required main checks precede any 1.2.1 tag or release.
+The manual workflow becomes available on GitHub after merging it into main.
+Before actual publication, configure npm's trusted publisher for
+`mbranicky/cypress-pulse`, workflow `publish.yml`, environment `npm`, allowing direct
+`npm publish`. OIDC authentication and real publication cannot be verified until
+that external trust is configured and publication is explicitly requested.
+The workflow is not dispatched and no npm publication occurs during PR preparation.
+
 ## 1.2.0
 
 Paseo 0.13 compatibility release. The supported app and daemon range is

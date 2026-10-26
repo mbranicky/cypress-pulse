@@ -25,6 +25,7 @@ controls are included in this release.
    ```sh
    npm ci
    npm run check
+   npm exec --yes --package=npm@11.5.1 -- npm run test:publishing
    npm run typecheck:paseo-012
    npm run typecheck:paseo-013
    npm run test:package -- --integration --output work/release
@@ -98,15 +99,79 @@ requirements. Do not put npm tokens in source or documentation.
 Tagging and publication are the final release steps, after all code, documentation,
 PR review, merge and verification are complete. They require explicit maintainer
 authorization. Create the matching version tag on the verified merged revision,
-then publish the exact checked tarball:
+then publish a GitHub Release with short release notes, installation and update
+commands, links to verification runs and the merge commit, and the tested tarball
+plus `SHA256SUMS`. GitHub provides the source ZIP and tar.gz, making four assets in
+the release UI. Save the release as published unless a draft is explicitly requested.
+
+### Manual GitHub Actions publication
+
+The **Publish to npm** workflow (`.github/workflows/publish.yml`) runs only through
+**Run workflow**, not on a push, PR, tag or GitHub Release event. It executes trusted
+publishing tools from `main` and publishes the existing release asset; it does not
+rebuild or run lifecycle scripts from the selected release. Node 24 and npm 11.5.1+
+provide OIDC authentication. No `NPM_TOKEN` secret or interactive npm login is needed
+inside the workflow.
+
+The verifier also enforces npm 11.5.1+ when invoked directly. npm 10.9.3 was
+reproduced executing `prepare` during `npm pack --dry-run --ignore-scripts`;
+npm 11.5.1 and the publishing runtime suppress it correctly. Both Node CI jobs
+therefore run publication tests using an isolated npm 11.5.1 CLI. The plugin's
+minimum Node checks and normal package integrations keep their original runtime.
+
+Configure these once before the first publication:
+
+1. In GitHub **Settings → Environments**, create `npm`. Under **Deployment branches
+   and tags**, choose **Selected branches and tags** and add only the branch `main`.
+   This restriction is required: the npm trust must not allow a modified workflow
+   on an arbitrary feature branch to publish. An additional required reviewer is
+   optional; the manual publish selection is already an explicit publishing action.
+2. On npmjs.com, open **paseo-cypress-pulse → Settings → Trusted publishing** and add
+   a GitHub Actions publisher with these exact values:
+
+   | Field | Value |
+   | --- | --- |
+   | Organization or user | `mbranicky` |
+   | Repository | `cypress-pulse` |
+   | Workflow filename | `publish.yml` |
+   | Environment name | `npm` |
+   | Allowed action | Enable direct `npm publish` |
+
+   Configure trust when ready to publish: npm currently requires the first
+   successful publication within two days of creating a trusted publisher.
+   See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
+
+After this workflow is merged into `main`:
+
+1. Publish the verified GitHub Release with its package and checksum assets.
+2. Open **Actions → Publish to npm → Run workflow**, choose branch `main`, enter
+   the plain version (for example `1.2.1`) and leave mode at `dry-run`.
+3. Review the successful run summary, which links the release, green main build
+   and merge commit and records the artifact checksum.
+4. Run it again with the same version and mode `publish` to publish that exact
+   package to npmjs.com. Publication runs are serialized and never auto-retried.
+5. The workflow waits for npm metadata and verifies registry integrity and the
+   downloaded package against the release asset. If npm accepted publication but
+   verification reports processing, use mode `verify` later. Do not repeat
+   `publish`, rerun a publish job, or submit the package again.
+
+The selected version must have a stable published release, a tag reachable from
+`main`, and both required Node jobs green in the latest main Tests run for that
+commit. All packaged files must match the tag, with only the documented removal
+of Git dependency preparation from the npm manifest. `dry-run` and `publish`
+reject versions already on npm and versions that would move `latest` backwards.
+`verify` permits checking an existing version even after a newer one is released.
+The workflow can select an earlier release such as 1.2.0 if these conditions hold;
+the version need not equal the package version on current `main`.
+
+For terminal publication, the same exact-artifact rule applies:
 
 ```sh
-npm publish work/release/paseo-cypress-pulse-VERSION.tgz --access public
+npm publish work/release/paseo-cypress-pulse-VERSION.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org/
 ```
 
 After npm publication, install `npm:paseo-cypress-pulse@VERSION` in a test Paseo
-daemon and verify its contributions. Complete the GitHub release with the tested
-tarball and checksum. Record post-publication evidence outside the immutable
+daemon and verify its contributions. Record post-publication evidence outside the immutable
 artifact, for example in GitHub release notes and local verification records.
 Do not follow publication with documentation edits intended for the same version.
 Any subsequent code or documentation correction belongs to a new version, with
