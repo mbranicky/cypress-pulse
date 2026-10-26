@@ -10,10 +10,13 @@ unchanged from 1.2.0.
 ### Completed local checks
 
 - Both workflows passed actionlint 1.7.12 syntax/expression validation.
-- All 13 publication-gate tests passed on Node 22.18.0 and Node 24.16.0. Tests cover
+- All 14 publication-gate tests passed on Node 22.18.0 and Node 24.16.0. Tests cover
   modified/missing/extra package files, unsafe archives, version/input validation,
   failed or incomplete main checks, unpublished releases, duplicate npm versions,
   latest downgrades, registry integrity and accepted-but-not-visible publications.
+- Reproduced npm 10.9.3 executing a prepare script despite the ignore-scripts
+  dry-run flag. The verifier now rejects npm below 11.5.1 before reading release
+  source; both CI Node jobs use isolated npm 11.5.1 for these tests.
 - Read-only preflight passed against the real published 1.2.0 GitHub Release,
   checking its main build, tag, source contents, release assets and checksum.
 - Post-publication verification passed against the existing npm 1.1.1 package:
@@ -35,8 +38,8 @@ unchanged from 1.2.0.
 
 ### Artifact and remaining gates
 
-- Package: `paseo-cypress-pulse-1.2.1.tgz`, 3,566,062 bytes, 56 files.
-- SHA-256: `bcfee09b2cb6c3f6dd8c29d3142162bd4527b6eaa6fb80471cfc7259d6eb761d`.
+- Package: `paseo-cypress-pulse-1.2.1.tgz`, 3,566,410 bytes, 56 files.
+- SHA-256: `fa233fc7898d66975f1cf04e927aae544eda26e67b26d3f1fdf353917ca724b1`.
 - Verified package, checksum and local evidence: `work/release-1.2.1/`.
 
 PR review, merge and both required main checks precede any 1.2.1 tag or release.

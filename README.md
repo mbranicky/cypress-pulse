@@ -172,12 +172,12 @@ One-time setup is required on GitHub and npmjs.com. See the
 ```sh
 npm ci
 npm run check
-npm run test:publishing
+npm exec --yes --package=npm@11.5.1 -- npm run test:publishing
 npm run test:package -- --integration
 paseo plugin install /absolute/path/to/cypress-pulse
 ```
 
-The integration suite requires installed Chrome for live-progress and screenshot-resolution verification. Publication-gate tests use Python 3's standard library, Git and npm; they do not publish packages.
+The integration suite requires installed Chrome for live-progress and screenshot-resolution verification. Publication tools and their tests require Python 3's standard library, Git and npm 11.5.1+; the command above selects that CLI without replacing your installed npm. Older npm can run lifecycle scripts during a packaging dry run despite `--ignore-scripts`, so the publishing verifier rejects it. These tests do not publish packages, and the plugin helper's Node requirements are unchanged.
 
 After changes, typecheck and run `paseo plugin reload cypress-pulse`.
 

@@ -40,7 +40,7 @@ jobs:
         run: npm run check
 
       - name: Verify npm publication gates
-        run: npm run test:publishing
+        run: npm exec --yes --package=npm@11.5.1 -- npm run test:publishing
 
       - name: Typecheck Paseo 0.12 compatibility
         run: npm run typecheck:paseo-012

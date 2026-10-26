@@ -25,6 +25,7 @@ controls are included in this release.
    ```sh
    npm ci
    npm run check
+   npm exec --yes --package=npm@11.5.1 -- npm run test:publishing
    npm run typecheck:paseo-012
    npm run typecheck:paseo-013
    npm run test:package -- --integration --output work/release
@@ -111,6 +112,12 @@ publishing tools from `main` and publishes the existing release asset; it does n
 rebuild or run lifecycle scripts from the selected release. Node 24 and npm 11.5.1+
 provide OIDC authentication. No `NPM_TOKEN` secret or interactive npm login is needed
 inside the workflow.
+
+The verifier also enforces npm 11.5.1+ when invoked directly. npm 10.9.3 was
+reproduced executing `prepare` during `npm pack --dry-run --ignore-scripts`;
+npm 11.5.1 and the publishing runtime suppress it correctly. Both Node CI jobs
+therefore run publication tests using an isolated npm 11.5.1 CLI. The plugin's
+minimum Node checks and normal package integrations keep their original runtime.
 
 Configure these once before the first publication:
 

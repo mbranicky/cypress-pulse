@@ -78,6 +78,10 @@ def archive_files(data):
 
 
 def verify_package(data, version, commit, repo):
+    # npm 10 can execute prepare during pack --dry-run despite --ignore-scripts.
+    # Enforce the publishing runtime here too, including direct/local invocation.
+    npm_version = command("npm", "--version").decode().strip()
+    require(stable_version(npm_version) >= (11, 5, 1), "Publishing verification requires npm 11.5.1+; older npm can execute prepare despite --ignore-scripts.")
     packed = archive_files(data)
     source = archive_files(command("git", "archive", "--format=tar", commit, cwd=repo))
     # npm's own file selection is the authority, without installing dependencies

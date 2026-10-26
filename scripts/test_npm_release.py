@@ -71,6 +71,12 @@ class ReleaseGates(unittest.TestCase):
         release.verify_package(self.package, "1.2.1", "HEAD", self.repo)
         self.assertFalse((self.repo / "executed").exists())
 
+    def test_old_npm_is_rejected_before_touching_release_source(self):
+        with patch.object(release, "command", return_value=b"10.9.3\n") as run:
+            with self.assertRaisesRegex(ValueError, "requires npm 11.5.1"):
+                release.verify_package(b"unused", "1.2.1", "HEAD", self.repo)
+            run.assert_called_once_with("npm", "--version")
+
     def test_modified_packaged_code_is_rejected(self):
         files = {**self.files, "package/server/cli.mjs": b"tampered"}
         with self.assertRaisesRegex(ValueError, "contents differ from tag"):
