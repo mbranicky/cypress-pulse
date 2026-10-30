@@ -1,5 +1,60 @@
 # Release verification
 
+## 1.3.0
+
+Paseo 0.14 compatibility release. The manifest now accepts `>=0.11.2 <0.15.0`;
+Cypress 16, helper Node requirements, production dependencies and dashboard behavior
+are unchanged. Version, installation examples and current compatibility claims are
+synchronized. Historical release evidence below remains unchanged.
+
+### Compatibility evidence
+
+- Verified the installed macOS app and connected daemon are both Paseo 0.14.0.
+- Confirmed the released 1.2.1 manifest is rejected on 0.14. A temporary range-only
+  copy passed activation, helper setup, owned skill installation, reload and history
+  RPC checks in a private 0.14 daemon. No runtime API adaptation was required.
+- Typechecked unchanged source against the exact 0.14.0 plugin/client/protocol SDKs.
+  Final checks passed for locked minimum 0.11.2 and isolated 0.12.0, 0.13.0 and
+  0.14.0 SDKs. Both existing required CI Node jobs now include the new SDK check.
+
+### Completed candidate checks
+
+- Both workflows passed actionlint 1.7.12 validation.
+- Typechecking and all 44 regression tests passed on Node 22.18.0 and 24.16.0.
+- All 14 publication-gate tests passed on both Node lines using npm 11.13.0.
+- Production-only package checks and all seven real Cypress integrations passed
+  on both Node lines. The packaged helper preserves project sources/configuration.
+- The exact tarball loaded and reloaded in an isolated Paseo 0.14 daemon; helper
+  doctor reported 1.3.0. Batch progress, intentional failure/retry outcomes, reload
+  during a run, settings persistence, source snippets/full source, screenshot and
+  video RPCs passed. Two interactive Cypress runs had distinct fresh run identities;
+  retry-attempt and hook command logs were attributed correctly.
+- Verified the actual macOS Paseo 0.14 client: workspace panel, Explorer command,
+  capture settings, numbered test source, full-file source and screenshot gallery.
+  Local evidence is in `work/release-1.3.0/ui/`. Existing packaged screenshots remain
+  applicable because no plugin GUI code changed.
+- The already-enabled local directory installation was reloaded successfully,
+  recovering its prior compatibility failure. Its installation path and enabled
+  state, existing capture settings and unrelated workspaces were preserved. The
+  previous foreground workspace was restored; the verification workspace remains
+  available for maintainer testing. Only the isolated test daemon/browser were stopped.
+- Production dependency audit: zero advisories. Full audit: three development-only
+  findings (`fast-uri` and `qs`, moderate; `systeminformation`, high). The high finding
+  concerns Windows `services()` command injection; this verification used macOS and
+  does not exercise that API. None of these packages ships in the production artifact.
+  Development dependency upgrades are outside this compatibility change.
+
+### Exact candidate
+
+- Package: `paseo-cypress-pulse-1.3.0.tgz`, 3,566,493 bytes, 56 files.
+- SHA-256: `d41c5b9190b4a0c91eab2fcc2f338719f90431c2c9a40a6c081d4e68fc1fdee0`.
+- Node 22, Node 24 and a fresh repack produced byte-identical tarballs.
+- Package, checksum and runtime evidence: `work/release-1.3.0/`.
+
+The PR and its GitHub checks are the next gate. Merge, green main checks, tagging,
+GitHub Release creation and npm publication require the maintainer's next instruction.
+No release tag or publication was created during preparation.
+
 ## 1.2.1
 
 Release-infrastructure update: a manual **Publish to npm** workflow, with version
