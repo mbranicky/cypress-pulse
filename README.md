@@ -2,7 +2,7 @@
 
 Current version: **1.3.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
-Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A header indicator keeps the run visible when the panel is closed.
+Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A composer pill above the prompt keeps the run visible when the panel is closed.
 
 Version **1.3.0** adds support for Paseo 0.14 while retaining compatibility with Paseo 0.11.2, 0.12 and 0.13. Dashboard and Cypress collection behavior are unchanged. See [release notes](RELEASE_NOTES.md#130) for the changes.
 
@@ -61,7 +61,7 @@ The installer runs only when clicked. Existing files or links owned by another i
 ## Using the panel
 
 - **Recent runs** switches between independent executions, including concurrent runs in the workspace.
-- The summary shows browser, run mode, elapsed time, completed tests and specs, outcomes, and retries. Spinners in the panel and workspace header indicate an active run.
+- The summary shows browser, run mode, elapsed time, completed tests and specs, outcomes, and retries. Spinners in the panel indicate an active run. A non-spinning Cypress pill appears above each agent’s prompt in the workspace, alongside other plugins’ pills; click it to open Cypress Pulse in Explorer.
 - The segmented progress bar distinguishes passed, failed, flaky, pending, and skipped tests. A **flaky** test passed after retrying; it is counted once, separately from clean passes in the legend. Batch totals are labeled **known tests** until all specs have loaded because Cypress does not know the contents of unevaluated files.
 - Tests are grouped by **spec file**, with outcome and retry counts in each header. Running and failing files appear first and start expanded; completed files start collapsed. Click the chevron, folder path, counts, or card background to expand or collapse a file. Test-detail and screenshot controls keep their own actions.
 - Click only the **filename or adjacent arrow** to read its current source, with line numbers and **Copy source**. Desktop source dialogs are up to 1120 px wide, and shrink to fit smaller screens. This is a read-only preview inside Paseo; native editor tabs are not exposed by Paseo 0.11.2’s plugin API.

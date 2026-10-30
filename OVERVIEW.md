@@ -1,6 +1,6 @@
 # Cypress Pulse
 
-Cypress Pulse shows Cypress run progress and failures alongside your agents in Paseo. Open its Explorer panel to see active runs, completed specs, test outcomes, flaky and retry counts, and failure details grouped by spec file. Expand a file section to inspect its tests, screenshot galleries and spec videos, or click its filename for a read-only source preview with line numbers. A workspace header indicator keeps progress visible while you work elsewhere.
+Cypress Pulse shows Cypress run progress and failures alongside your agents in Paseo. Open its Explorer panel to see active runs, completed specs, test outcomes, flaky and retry counts, and failure details grouped by spec file. Expand a file section to inspect its tests, screenshot galleries and spec videos, or click its filename for a read-only source preview with line numbers. A composer pill above the agent prompt keeps progress visible while you work elsewhere. It appears alongside other plugins’ pills, uses a static status icon, and opens Cypress Pulse when clicked.
 
 Batch runs use a companion launch helper that reads your existing Cypress configuration and adds reporting for that invocation. It preserves existing hooks and reporters. It does not add or edit files in the tested project's sources. Interactive Chromium sessions are observed through Cypress Tap.
 
