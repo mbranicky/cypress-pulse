@@ -2,6 +2,12 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.3.0
+
+- Support Paseo app and daemon 0.14, with the supported range now `>=0.11.2 <0.15.0`.
+- Add isolated checks against the exact Paseo 0.14.0 SDK to both CI Node jobs, retaining minimum, 0.12 and 0.13 SDK checks.
+- Update installation, compatibility and release documentation for 1.3.0. Dashboard and Cypress collection behavior remain unchanged.
+
 ## 1.2.1
 
 Manual npm publishing from GitHub Actions; plugin behavior and supported versions are unchanged.

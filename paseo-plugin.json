@@ -3,7 +3,7 @@
   "name": "Cypress Pulse",
   "description": "Live Cypress run progress and failures alongside your Paseo agents.",
   "requirements": {
-    "paseo": ">=0.11.2 <0.14.0"
+    "paseo": ">=0.11.2 <0.15.0"
   },
   "media": [
     "assets/running.png",
