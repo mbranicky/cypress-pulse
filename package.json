@@ -32,7 +32,7 @@
     "typecheck:paseo-012": "node scripts/check-paseo-sdk.mjs",
     "typecheck:paseo-013": "node scripts/check-paseo-sdk.mjs 0.13.0",
     "typecheck:paseo-014": "node scripts/check-paseo-sdk.mjs 0.14.0",
-    "test": "node --test server/*.test.mjs",
+    "test": "node --test server/*.test.mjs client/*.test.mjs",
     "test:publishing": "python3 -m unittest discover -s scripts -p 'test_*.py'",
     "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",
     "check": "npm run typecheck && npm test",
