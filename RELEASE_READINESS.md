@@ -1,5 +1,51 @@
 # Release verification
 
+## 1.3.1
+
+Patch release of the composer pill and approved mint Signal directory icon, merged
+in PRs #14 and #15. Paseo `>=0.11.2 <0.15.0`, Cypress 16 and helper Node support
+remain unchanged. No dependency versions or integrities changed.
+
+### Completed candidate checks
+
+- Verified the installed Paseo app and daemon are both 0.14.0. Source typechecks
+  passed against the minimum 0.11.2 and exact 0.12.0, 0.13.0 and 0.14.0 SDKs.
+- All 48 checks passed on Node 22.18.0 and 24.16.0, including four composer-pill
+  lifecycle tests. All 14 publication safeguards passed on both Node lines.
+- Production package checks and all seven real Cypress integrations passed on both
+  Node lines. The Node 22/24 tarballs and a fresh repack were byte-identical.
+- The exact tarball loaded/reloaded in an isolated Paseo 0.14 daemon; helper doctor
+  reported 1.3.1. Verified settings persistence, skill installation, batch progress,
+  intentional failure/retry outcomes, reload during a run, numbered source/full-file
+  previews, screenshot/video RPCs and interactive retry/hook logs. Two interactive
+  runs produced distinct fresh identities. Only owned test processes were stopped.
+- The composer client implementation is unchanged from the live Paseo 0.14 check
+  for PR #14: a static pill above the prompt opens Explorer and updates in place.
+  The captured composer image is now included in the package and README.
+- Verified the manifest icon resolves to the approved 512×512 PNG; both PNG and SVG
+  match the approved mint Signal artwork byte-for-byte. Package checks enforce icon
+  presence, PNG signature and dimensions. The PNG SHA-256 is
+  `94dbd4c5a6a25a72005893014c88684a789af4dcce33c0fd5c12fda8a40fe533`.
+- Verified packed README/overview versions, installation/update/tag examples, release
+  notes, helper and shrinkwrap root versions; finalized documentation before the PR.
+- Production dependency audit: zero advisories. The full development tree reports
+  15 affected packages (14 moderate, one high), from fast-uri/qs/minimatch advisories
+  and Windows-specific systeminformation services() command injection. These are
+  development-only dependencies and are absent from the production installation.
+  No unrelated host-library or development dependency upgrade is part of this patch.
+
+### Exact candidate and distribution gates
+
+- Package: `paseo-cypress-pulse-1.3.1.tgz`, 3,641,395 bytes, 59 files.
+- SHA-256: `4d5bd19b7f5e2b67edfbb2a7696d2af903666a4b04edd7c35f7b0c62d48a966c`.
+- Exact package, checksum and runtime evidence: `work/release-1.3.1/`.
+- Require final PR checks, merge and green checks on that exact main revision before
+  tagging. Publish the tested tarball through the existing OIDC workflow and verify
+  fresh npm installation after registry availability.
+- The directory uses a separately approved npm pin. Its metadata resolver derives
+  the icon URL from the pinned package manifest. Verify both the deployed 1.3.1
+  directory entry and its PNG bytes after the registry update is reviewed/published.
+
 ## 1.3.0
 
 Paseo 0.14 compatibility release. The manifest now accepts `>=0.11.2 <0.15.0`;

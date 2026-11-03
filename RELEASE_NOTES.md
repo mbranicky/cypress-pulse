@@ -2,6 +2,13 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.3.1
+
+- Move the run indicator from the workspace toolbar to a composer pill above each agent’s prompt, with a static status icon instead of a spinner.
+- Keep count updates in place alongside other plugins’ pills; clicking the pill opens Cypress Pulse in Explorer. Clean up registrations when agents move, disappear or the plugin unloads.
+- Add the approved mint Signal directory icon as a 512×512 PNG, with its SVG master included in the package.
+- Add composer-pill lifecycle coverage and package checks for icon assets, and update documentation and screenshots for the release. Paseo, Cypress and Node support ranges are unchanged.
+
 ## 1.3.0
 
 - Support Paseo app and daemon 0.14, with the supported range now `>=0.11.2 <0.15.0`.

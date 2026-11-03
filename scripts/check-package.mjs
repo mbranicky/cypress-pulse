@@ -55,6 +55,13 @@ try {
     }
   }
   for (const media of manifest.media) assert.ok(files.has(media), `Missing media: ${media}`);
+  assert.equal(manifest.icon, "assets/icon.png", "Directory icon must reference the PNG");
+  for (const icon of [manifest.icon, "assets/icon.svg"])
+    assert.ok(files.has(icon), `Missing icon artwork: ${icon}`);
+  const icon = await readFile(join(installed, manifest.icon));
+  assert.equal(icon.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", "Directory icon must be PNG");
+  assert.equal(icon.readUInt32BE(16), 512, "Directory icon width");
+  assert.equal(icon.readUInt32BE(20), 512, "Directory icon height");
   const { VERSION } = await import(pathToFileURL(join(installed, "server/environment.mjs")));
   assert.equal(VERSION, pkg.version, "Package and helper versions differ");
   // Validate the shipped documentation, not just the working-tree metadata.
