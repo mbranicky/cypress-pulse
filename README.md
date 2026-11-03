@@ -2,11 +2,11 @@
 
 <img src="assets/icon.png" width="64" height="64" alt="Cypress Pulse Signal icon">
 
-Current version: **1.3.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+Current version: **1.3.2** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A composer pill above the prompt keeps the run visible when the panel is closed.
 
-Version **1.3.1** moves run progress to a static composer pill above the agent prompt and adds the mint Signal icon for the plugin directory. It retains support for Paseo 0.11.2 through 0.14. See [release notes](RELEASE_NOTES.md#131) for the changes.
+Version **1.3.2** supports Paseo 0.15 while retaining support for 0.11.2 through 0.14, the composer pill and the mint Signal directory icon. See [release notes](RELEASE_NOTES.md#132) for the changes.
 
 The npm package name is **`paseo-cypress-pulse`**. Paseo’s plugin ID, the helper command, and the agent skill remain `cypress-pulse`; the GitHub repository remains `mbranicky/cypress-pulse`.
 
@@ -32,19 +32,19 @@ The composer pill keeps run status visible without a toolbar spinner. Click it t
 
 ## Get started
 
-Install version **1.3.1**, including support for Paseo 0.14:
+Install version **1.3.2**, including support for Paseo 0.15:
 
 ```sh
-paseo plugin install npm:paseo-cypress-pulse@1.3.1
+paseo plugin install npm:paseo-cypress-pulse@1.3.2
 ```
 
 Existing npm installations can update with:
 
 ```sh
-paseo plugin update cypress-pulse --version 1.3.1 --yes
+paseo plugin update cypress-pulse --version 1.3.2 --yes
 ```
 
-For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.3.1`.
+For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.3.2`.
 
 1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
 2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
@@ -60,7 +60,7 @@ The installer runs only when clicked. Existing files or links owned by another i
 
 | Component            | Supported versions      |
 | -------------------- | ----------------------- |
-| Paseo app and daemon | `>=0.11.2 <0.15.0`      |
+| Paseo app and daemon | `>=0.11.2 <0.16.0`      |
 | Project Cypress      | `>=16.0.0 <17.0.0`      |
 | Helper Node.js       | `^22.18.0` or `^24.0.0` |
 
@@ -173,7 +173,7 @@ One-time setup is required on GitHub and npmjs.com. See the
 
 ## Development and verification
 
-[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0, 0.13.0 and 0.14.0 SDKs, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012`, `npm run typecheck:paseo-013` and `npm run typecheck:paseo-014` locally for the same isolated checks. The test workflow also supports manual runs and tests the npm publication gates. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
+[GitHub Actions](https://github.com/mbranicky/cypress-pulse/actions/workflows/tests.yml) runs typechecking, unit tests, and Cypress integration tests for pull requests targeting `main` and every push to `main`, using Ubuntu with Node 22.18.0 and 24.x. PR tests run when a pull request is opened, reopened, or updated with new commits. Marking a draft ready for review does not rerun unchanged code. Both Node jobs also typecheck the client, server and shared code against the exact Paseo 0.12.0, 0.13.0, 0.14.0 and 0.15.0 SDKs, while the locked development SDK remains 0.11.2 for minimum-version checks. Run `npm run typecheck:paseo-012`, `npm run typecheck:paseo-013`, `npm run typecheck:paseo-014` and `npm run typecheck:paseo-015` locally for the same isolated checks. The test workflow also supports manual runs and tests the npm publication gates. It audits production dependencies and verifies a clean production-only npm package, including Git dependency preparation and real Cypress runs through the packaged helper.
 
 ```sh
 npm ci

@@ -1,5 +1,47 @@
 # Release verification
 
+## 1.3.2
+
+Paseo 0.15 compatibility patch. The supported app and daemon range is
+`>=0.11.2 <0.16.0`; minimum 0.11.2 and all previously supported lines remain.
+No runtime API adaptation or dependency change was needed.
+
+### Completed candidate checks
+
+- Verified installed macOS Paseo app and connected daemon 0.15.0 separately.
+- Demonstrated that published 1.3.1 is rejected by its upper bound in an isolated
+  0.15 daemon; a temporary range-only copy activated without API changes.
+- Typechecked unchanged client, server and shared code against exact 0.15.0 SDKs.
+  Retained locked minimum 0.11.2 and isolated 0.12, 0.13 and 0.14 checks. Both
+  required CI Node jobs include the new 0.15 check without changing job names.
+- Passed all 48 regression checks and 14 publication safeguards on Node 22.18.0
+  and 24.16.0. All seven packaged real Cypress integrations passed on both lines.
+- Installed the production-only artifact in an isolated 0.15 daemon and verified
+  helper version, activation/reload, skill setup, saved settings, batch collection,
+  intentional failure/flaky retry results, reload during execution, source snippets,
+  full-file previews and screenshot/video RPCs. Interactive retries and hook logs
+  passed; two reruns produced distinct fresh identities.
+- Verified the installed 0.15 app displays the dashboard, expanded test cards,
+  capture settings and full-file source preview. Runtime GUI is unchanged, so the
+  existing screenshots remain representative. The existing enabled local directory
+  registration was reloaded in place; its source and settings were preserved.
+- Production audit: zero advisories. The full development tree reports 15 affected
+  packages (14 moderate, one high), unchanged from 1.3.1: fast-uri/qs/minimatch
+  chains and Windows-specific systeminformation services() command injection.
+  These development dependencies are absent from the production artifact.
+- Updated package/helper/root lock versions, compatibility claims, bundled skill,
+  installation/update/tag examples, release notes and release procedure together.
+  Only the two root version fields changed in the lock; dependencies are unchanged.
+
+### Artifact and publication gates
+
+Exact tarball, checksum and runtime evidence are retained under `work/release-1.3.2/`.
+Verify final PR checks and exact merged-main checks before tagging. Publish the
+verified tarball through the existing GitHub Actions OIDC workflow, then verify
+registry bytes and a fresh npm-based install in an isolated 0.15 daemon.
+The separate plugin directory currently serves approved 1.3.1 and its mint icon;
+a newer npm version needs a separately reviewed directory pin.
+
 ## 1.3.1
 
 Patch release of the composer pill and approved mint Signal directory icon, merged

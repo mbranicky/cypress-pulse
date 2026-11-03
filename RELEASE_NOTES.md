@@ -2,6 +2,12 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.3.2
+
+- Support Paseo app and daemon 0.15 with the range `>=0.11.2 <0.16.0`, retaining all previously supported versions.
+- Add isolated exact 0.15.0 SDK checks to both required CI Node jobs while retaining the locked minimum and previous SDK checks.
+- Update compatibility, installation and release documentation. Dashboard, composer pill, icon, Cypress collection and dependency versions are unchanged.
+
 ## 1.3.1
 
 - Move the run indicator from the workspace toolbar to a composer pill above each agent’s prompt, with a static status icon instead of a spinner.
