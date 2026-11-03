@@ -1,10 +1,12 @@
 # Cypress Pulse
 
-Current version: **1.3.0** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
+<img src="assets/icon.png" width="64" height="64" alt="Cypress Pulse Signal icon">
+
+Current version: **1.3.1** · [Release notes](RELEASE_NOTES.md) · [Release procedure](RELEASING.md)
 
 Watch Cypress tests from Paseo’s Explorer panel while your agent works. Follow live spec progress, browse tests grouped by their spec file, inspect source, and browse screenshots and spec videos without leaving the workspace. A composer pill above the prompt keeps the run visible when the panel is closed.
 
-Version **1.3.0** adds support for Paseo 0.14 while retaining compatibility with Paseo 0.11.2, 0.12 and 0.13. Dashboard and Cypress collection behavior are unchanged. See [release notes](RELEASE_NOTES.md#130) for the changes.
+Version **1.3.1** moves run progress to a static composer pill above the agent prompt and adds the mint Signal icon for the plugin directory. It retains support for Paseo 0.11.2 through 0.14. See [release notes](RELEASE_NOTES.md#131) for the changes.
 
 The npm package name is **`paseo-cypress-pulse`**. Paseo’s plugin ID, the helper command, and the agent skill remain `cypress-pulse`; the GitHub repository remains `mbranicky/cypress-pulse`.
 
@@ -24,21 +26,25 @@ These are real Paseo desktop captures of an isolated example storefront. One ass
 
 </details>
 
+<img src="assets/composer-pill.png" width="600" alt="Static Cypress result pill above the agent prompt, alongside the Run and Changes controls">
+
+The composer pill keeps run status visible without a toolbar spinner. Click it to open Cypress Pulse in Explorer.
+
 ## Get started
 
-Install version **1.3.0**, including support for Paseo 0.14:
+Install version **1.3.1**, including support for Paseo 0.14:
 
 ```sh
-paseo plugin install npm:paseo-cypress-pulse@1.3.0
+paseo plugin install npm:paseo-cypress-pulse@1.3.1
 ```
 
 Existing npm installations can update with:
 
 ```sh
-paseo plugin update cypress-pulse --version 1.3.0 --yes
+paseo plugin update cypress-pulse --version 1.3.1 --yes
 ```
 
-For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.3.0`.
+For installation from Git, use `paseo plugin install github:mbranicky/cypress-pulse --ref paseo-cypress-pulse-v1.3.1`.
 
 1. Open a project workspace in Paseo, then choose **Open Cypress Pulse** in the Command Center. The panel opens in Explorer.
 2. Click **Install skill** in the panel. It adds user-level skill links on the daemon host in `~/.agents/skills`, `~/.claude/skills`, and `~/.codex/skills`.
