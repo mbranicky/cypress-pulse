@@ -2,6 +2,13 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.4.0
+
+- Support Paseo app and daemon 0.16 with the range `>=0.11.2 <0.17.0`, retaining all previously supported versions.
+- Add an isolated exact 0.16.0 SDK check to both required Node CI jobs while retaining the locked minimum and previous SDK checks.
+- Update compatibility, usage and release documentation. Dashboard, composer pill, icon, Cypress collection and dependency versions are unchanged.
+- Prepare the explicitly requested minor release from 1.3.2 to 1.4.0; verification uses a separate Paseo 0.16 installation and daemon.
+
 ## 1.3.2
 
 - Support Paseo app and daemon 0.15 with the range `>=0.11.2 <0.16.0`, retaining all previously supported versions.

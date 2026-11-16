@@ -1,5 +1,59 @@
 # Release verification
 
+## 1.4.0
+
+Paseo 0.16 compatibility candidate. This minor version was explicitly requested
+by the maintainer; it is an exception to the update skill's usual patch-only rule.
+The supported app/daemon range is `>=0.11.2 <0.17.0`. Older supported versions,
+Cypress 16 requirements, Node requirements and dependencies are unchanged.
+No runtime API adaptation was required.
+
+### Completed compatibility and package checks
+
+- Confirmed the active macOS app and daemon are 0.15.4, and preserved that live
+  installation. Downloaded the official signed Paseo 0.16.0 desktop build into a
+  separate temporary location and verified its bundle version and code signature.
+- Used only the separate build's bundled CLI for target daemon checks. Its daemon,
+  desktop profile, helper/skill folders, settings and Cypress Pulse state were
+  isolated from the user's active installation. The desktop connected to its own
+  distinct host. Only owned verification processes were stopped afterward.
+- Demonstrated that 1.3.2 is rejected by its upper bound on a 0.16.0 daemon;
+  a temporary range-only copy activated successfully. Unchanged client, server
+  and shared code typechecked against the exact 0.16.0 SDKs. Retained the locked
+  minimum 0.11.2 and exact 0.12/0.13/0.14/0.15 checks.
+- Added exact 0.16 SDK verification to both existing required CI jobs without
+  changing their names. New composer APIs are additive; existing composer-pill,
+  workspace-panel, command and settings APIs remain supported.
+- Passed 48 regressions, 14 publication safeguards and seven real packaged Cypress
+  integrations on Node 22.18.0 and 24.16.0. Both Node lines produced identical
+  production-only tarballs with 59 files.
+- The exact package installed and reloaded on the separate 0.16 daemon. Verified
+  helper version, skill setup, settings persistence, batch results and flaky/failure
+  outcomes, reload during an active helper, numbered source/full-file RPCs and
+  screenshot/video RPCs. Two interactive reruns produced fresh identities; retry
+  attempts and hook logs were attributed correctly.
+- Verified the separate 0.16 desktop renders the dashboard and capture settings,
+  test details with original line numbers, full-file source, both captured images
+  with gallery navigation, and the recorded video playing through to its end.
+  Plugin UI code is unchanged; existing screenshots remain representative.
+- Production audit: zero advisories. The full development tree reports three
+  affected packages: fast-uri and qs (moderate), and systeminformation (high,
+  Windows-specific services() command injection). None is shipped as a production
+  dependency. No unrelated development/host-library upgrade is included.
+- Updated package/helper/root-lock versions, README/overview current versions,
+  installation/update/tag references, supported ranges, bundled usage instructions,
+  release notes and procedure. Historical evidence remains at its original version.
+
+### Candidate and remaining release gates
+
+Exact tarball, checksum and runtime records are retained in `work/release-1.4.0/`.
+All packaged files must match the preparation PR. Tagging and publishing are outside
+this preparation request. Before a later release, require final PR checks, merge,
+and green checks for the exact merged revision, then verify artifact identity,
+create the matching tag and published GitHub Release, and use the existing manual
+npm OIDC dry-run/publish/verify process. Verify a fresh npm-based installation after
+publication. A directory version pin is a separate reviewed update.
+
 ## 1.3.2
 
 Paseo 0.15 compatibility patch. The supported app and daemon range is
