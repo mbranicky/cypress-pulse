@@ -1,6 +1,6 @@
 {
   "name": "paseo-cypress-pulse",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A standalone Cypress run dashboard for Paseo",
   "license": "MIT",
   "type": "module",
@@ -39,7 +39,8 @@
     "pack:release": "node scripts/package.mjs",
     "test:package": "node scripts/check-package.mjs",
     "typecheck:paseo-015": "node scripts/check-paseo-sdk.mjs 0.15.0",
-    "typecheck:paseo-016": "node scripts/check-paseo-sdk.mjs 0.16.0"
+    "typecheck:paseo-016": "node scripts/check-paseo-sdk.mjs 0.16.0",
+    "typecheck:paseo-017": "node scripts/check-paseo-sdk.mjs 0.17.0 && node scripts/check-paseo-sdk.mjs 0.17.1"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "7.1.1",

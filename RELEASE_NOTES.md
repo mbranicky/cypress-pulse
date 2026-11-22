@@ -2,6 +2,13 @@
 
 Version history from the repository's implementation commits. These entries describe plugin versions; they do not imply npm publication.
 
+## 1.4.1
+
+- Support Paseo app and daemon 0.17 with the range `>=0.11.2 <0.18.0`, retaining all previously supported versions.
+- Add exact 0.17.0 and 0.17.1 SDK checks to both required Node CI jobs, retaining the minimum and previous SDK checks.
+- Allow the live screenshot integration test to use `CYPRESS_PULSE_TEST_BROWSER`, matching the webpack integration tests; CI still defaults to Chrome.
+- Update compatibility and release documentation. Plugin runtime behavior, dashboard, icon and dependency versions are unchanged.
+
 ## 1.4.0
 
 - Support Paseo app and daemon 0.16 with the range `>=0.11.2 <0.17.0`, retaining all previously supported versions.
