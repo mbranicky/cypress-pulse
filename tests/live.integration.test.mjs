@@ -55,7 +55,7 @@ test(
             String(scale),
             "--",
             "--browser",
-            "chrome",
+            process.env.CYPRESS_PULSE_TEST_BROWSER || "chrome",
           ],
           { cwd: project, timeout: 75_000, maxBuffer: 4 * 1024 * 1024 },
         ).then(

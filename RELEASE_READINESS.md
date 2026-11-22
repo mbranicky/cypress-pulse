@@ -1,5 +1,30 @@
 # Release verification
 
+## 1.4.1
+
+Paseo 0.17 compatibility patch, from the published 1.4.0 baseline. The app/daemon
+range is `>=0.11.2 <0.18.0`; no runtime API adaptations or dependency changes.
+
+- Exact 0.17.0 and 0.17.1 SDK checks pass, preserving locked minimum SDK 0.11.2.
+- Baseline: 48 regressions, 14 publication guard tests, and seven packaged Cypress
+  integrations on Node 22.18.0 and 24.16.0 pass.
+- Isolated 0.17.1 daemon rejects the original manifest. A range-only copy activates
+  and reloads; batch/interactive outcomes, retries, hook logs, source, media,
+  settings, owned skill links and reload during execution pass.
+- The 0.17.1 desktop renders the dashboard, failure report, numbered test source,
+  full spec preview and capture settings. Daily installation remains unchanged.
+- Installed Chrome 158 fails in plain Cypress 16.1.1 as well as the helper with
+  `* is not a valid URL`. Bundled Electron and installed Chromium 156 pass.
+  The live integration test now accepts the existing browser override convention.
+- Production audit: zero findings. Three existing development-only affected packages
+  remain: fast-uri and qs (moderate), systeminformation (high, Windows services()
+  command injection). They are absent from the production artifact; dependency
+  upgrades unrelated to this compatibility patch are not included.
+- No plugin visual changes; existing example screenshots remain applicable.
+
+Final artifact and post-publication evidence are kept outside published contents
+in `work/release-1.4.1/`. Tagging and publication follow exact merged-main CI.
+
 ## 1.4.0
 
 Paseo 0.16 compatibility candidate. This minor version was explicitly requested
