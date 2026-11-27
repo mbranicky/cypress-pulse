@@ -1,5 +1,32 @@
 # Release verification
 
+## 1.4.2
+
+Paseo 0.18 compatibility patch, from the published 1.4.1 baseline. The app/daemon
+range is `>=0.11.2 <0.19.0`; no runtime API adaptations or dependency changes.
+
+- Exact 0.18.0 and 0.18.1 SDK checks pass on both supported Node lines; the locked
+  minimum SDK 0.11.2 and all previous exact SDK checks remain in place.
+- Baseline: 48 regressions, 14 publication guard tests, and seven packaged Cypress
+  integrations pass. Package integrations pass on Node 22.18.0 and 24.16.0.
+- The isolated 0.18.1 daemon rejects the original manifest; a range-only copy
+  activates and reloads. Batch/interactive outcomes, retries, hook logs, source,
+  media, settings, owned skill links and reload during execution pass.
+- Desktop 0.18.1 renders the dashboard, failure and flaky results, numbered test
+  source, full spec preview and persisted capture settings.
+- Production audit: zero findings. Existing development-only fast-uri and qs
+  moderate findings and systeminformation Windows services() high finding remain
+  outside the production artifact. No unrelated dependency upgrades are included.
+- Local browser checks use bundled Electron and Chromium 156. CI also reproduced
+  the Cypress 16.1.1 / Chrome 158 `* is not a valid URL` startup failure on both
+  Node jobs, so CI pins Chrome for Testing 156.0.8078.80 and retains the full
+  screenshot-scale integration rather than skipping it.
+- No plugin visual changes; existing screenshots remain applicable. Daily plugin
+  installation and settings are unchanged.
+
+Exact candidate and post-publication evidence are kept outside published contents
+in `work/release-1.4.2/`. Tagging and publication follow exact merged-main CI.
+
 ## 1.4.1
 
 Paseo 0.17 compatibility patch, from the published 1.4.0 baseline. The app/daemon

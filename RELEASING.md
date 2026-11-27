@@ -6,7 +6,7 @@ verifying a release does not publish it. npm publication is a separate action.
 ## Release scope
 
 The current source targets Cypress end-to-end tests on macOS desktop with
-Paseo app and daemon `>=0.11.2 <0.18.0`, Cypress `>=16.0.0 <17.0.0`, and helper
+Paseo app and daemon `>=0.11.2 <0.19.0`, Cypress `>=16.0.0 <17.0.0`, and helper
 Node `^22.18.0 || ^24.0.0`. Ubuntu CI verifies the batch helper and filesystem
 logic on both supported Node lines. Linux desktop, Windows, mobile clients and
 component testing remain unverified. Do not describe CI coverage as desktop
@@ -32,13 +32,15 @@ controls are included in this release.
    npm run typecheck:paseo-015
    npm run typecheck:paseo-016
    npm run typecheck:paseo-017
+   npm run typecheck:paseo-018
    npm run test:package -- --integration --output work/release
    npm audit --omit=dev
    ```
 
    Set `CYPRESS_PULSE_TEST_BROWSER` to a compatible Chromium executable when the
-   system Chrome is incompatible with the project’s Cypress version. CI keeps its
-   normal Chrome default.
+   system Chrome is incompatible with the project’s Cypress version. CI pins
+   Chrome for Testing 156.0.8078.80: Cypress 16.1.1 fails before tests start with
+   Chrome 158. Reverify the screenshot-scale integration before changing this pin.
 
    On Linux, run the package integration check under `xvfb-run --auto-servernum`.
    The package check executes Git's production dependency preparation, packs and
