@@ -60,6 +60,9 @@ jobs:
       - name: Typecheck Paseo 0.17 compatibility
         run: npm run typecheck:paseo-017
 
+      - name: Typecheck Paseo 0.18 compatibility
+        run: npm run typecheck:paseo-018
+
       - name: Verify browser dependencies
         run: |
           google-chrome --version
