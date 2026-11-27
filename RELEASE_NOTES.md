@@ -4,6 +4,8 @@ Version history from the repository's implementation commits. These entries desc
 
 ## 1.4.2
 
+- Pin CI Chrome for Testing to 156.0.8078.80 to retain Chromium screenshot-scale coverage while Cypress 16.1.1 is incompatible with runner Chrome 158.
+
 - Support Paseo app and daemon 0.18 with the range `>=0.11.2 <0.19.0`, retaining all previously supported versions.
 - Add exact 0.18.0 and 0.18.1 SDK checks to both required Node CI jobs, retaining the minimum and previous SDK checks.
 - Verify desktop and daemon 0.18.1 with batch and interactive results, retries, logs, source previews, media, settings and reload. No runtime API or dependency changes are needed.

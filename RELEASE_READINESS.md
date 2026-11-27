@@ -17,8 +17,10 @@ range is `>=0.11.2 <0.19.0`; no runtime API adaptations or dependency changes.
 - Production audit: zero findings. Existing development-only fast-uri and qs
   moderate findings and systeminformation Windows services() high finding remain
   outside the production artifact. No unrelated dependency upgrades are included.
-- Local browser checks use bundled Electron and Chromium 156; system Chrome 158
-  is incompatible with plain Cypress 16.1.1 on this Mac, as recorded for 1.4.1.
+- Local browser checks use bundled Electron and Chromium 156. CI also reproduced
+  the Cypress 16.1.1 / Chrome 158 `* is not a valid URL` startup failure on both
+  Node jobs, so CI pins Chrome for Testing 156.0.8078.80 and retains the full
+  screenshot-scale integration rather than skipping it.
 - No plugin visual changes; existing screenshots remain applicable. Daily plugin
   installation and settings are unchanged.
 

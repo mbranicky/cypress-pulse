@@ -38,8 +38,9 @@ controls are included in this release.
    ```
 
    Set `CYPRESS_PULSE_TEST_BROWSER` to a compatible Chromium executable when the
-   system Chrome is incompatible with the project’s Cypress version. CI keeps its
-   normal Chrome default.
+   system Chrome is incompatible with the project’s Cypress version. CI pins
+   Chrome for Testing 156.0.8078.80: Cypress 16.1.1 fails before tests start with
+   Chrome 158. Reverify the screenshot-scale integration before changing this pin.
 
    On Linux, run the package integration check under `xvfb-run --auto-servernum`.
    The package check executes Git's production dependency preparation, packs and
