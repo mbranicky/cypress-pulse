@@ -16,8 +16,6 @@ jobs:
     name: Node ${{ matrix.node }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    env:
-      CYPRESS_PULSE_TEST_BROWSER: ${{ runner.temp }}/pulse-chrome/chrome-linux64/chrome
     strategy:
       fail-fast: false
       matrix:
@@ -73,6 +71,7 @@ jobs:
             https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.80/linux64/chrome-linux64.zip \
             --output "$RUNNER_TEMP/pulse-chrome.zip"
           unzip -q "$RUNNER_TEMP/pulse-chrome.zip" -d "$RUNNER_TEMP/pulse-chrome"
+          printf 'CYPRESS_PULSE_TEST_BROWSER=%s/pulse-chrome/chrome-linux64/chrome\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
 
       - name: Verify browser dependencies
         run: |
